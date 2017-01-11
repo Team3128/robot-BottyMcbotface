@@ -5,5 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/3128-robot-common"/>
 	<classpathentry kind="var" path="networktables" sourcepath="networktables.sources"/>
 	<classpathentry kind="var" path="wpilib" sourcepath="wpilib.sources"/>
+	<classpathentry kind="lib" path="hardwareLibs/TalonSRXLibJava.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
