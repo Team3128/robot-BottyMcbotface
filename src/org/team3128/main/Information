@@ -1,0 +1,10 @@
+Motor, Pneumatic, and Variable Information
+
+2 shooter wheel motors: run in sync with velocity PID
+4 drive motors: CTR mag encoder
+1 intake motor: toggle on/off
+1 shooter intake motor
+1 lifter CIM: 1 direction
+1 roller for gears
+
+2 pneumatic shifters... and other pneumatics to come
