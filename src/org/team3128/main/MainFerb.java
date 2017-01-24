@@ -88,6 +88,7 @@ public class MainFerb extends NarwhalRobot {
 				
 		lmRight.nameControl(new POV(0), "IntakePOV");
 		lmRight.nameControl(new Button(2),"GearShift");
+		lmRight.nameControl(new Button(3), "ClearStickyFaults");
 		lmRight.nameControl(new Button(4),"FullSpeed");
 		lmRight.nameControl(new Button(7),"Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
