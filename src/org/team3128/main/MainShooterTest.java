@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
- * Test shooter for our 2017 robot, the Botty Mcbotface.
+ * Test shooter for our 2017 robot, Ferb
  */
 public class MainShooterTest extends NarwhalRobot
 {
