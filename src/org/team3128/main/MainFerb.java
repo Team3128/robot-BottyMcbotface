@@ -36,7 +36,10 @@ public class MainFerb extends NarwhalRobot {
 	public Victor gearRollerMotor;
 	
 	public ListenerManager lmRight;
+	public ListenerManager lmLeft;
+	
 	public Joystick rightJoystick;
+	public Joystick leftJoystick;
 	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPistons;
@@ -49,8 +52,10 @@ public class MainFerb extends NarwhalRobot {
 	@Override
 	protected void constructHardware() {
 		lmRight = new ListenerManager(rightJoystick);
+		lmLeft = new ListenerManager(leftJoystick);
 		
 		addListenerManager(lmRight);
+		addListenerManager(lmLeft);
 		
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -96,6 +101,21 @@ public class MainFerb extends NarwhalRobot {
 		lmRight.nameControl(new Button(11),"GearRoller");
 		lmRight.nameControl(new Button(12),"GearJab");
 		
+		lmLeft.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
+		lmLeft.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
+		lmLeft.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
+		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "Shoot");
+				
+		lmLeft.nameControl(new POV(0), "IntakePOV");
+		lmLeft.nameControl(new Button(2),"GearShift");
+		lmLeft.nameControl(new Button(3), "ClearStickyFaults");
+		lmLeft.nameControl(new Button(4),"FullSpeed");
+		lmLeft.nameControl(new Button(7),"Climb");
+		lmLeft.nameControl(new Button(9), "StartCompressor");
+		lmLeft.nameControl(new Button(10), "StopCompressor");
+		lmLeft.nameControl(new Button(11),"GearRoller");
+		lmLeft.nameControl(new Button(12),"GearJab");
+		
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
@@ -121,6 +141,35 @@ public class MainFerb extends NarwhalRobot {
 		});
 		
 		lmRight.addListener("StopCompressor", () -> 
+		{
+			compressor.stop();
+		});
+		
+		lmLeft.addMultiListener(() -> {
+			drive.arcadeDrive(lmLeft.getAxis("MoveTurn"),
+					lmLeft.getAxis("MoveForwards"),
+					lmLeft.getAxis("Throttle"),
+					lmLeft.getButton("FullSpeed"));
+		
+		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
+		
+		lmLeft.addListener("ClearStickyFaults", () ->
+		{
+			powerDistPanel.clearStickyFaults();
+		});
+		
+		lmLeft.addListener("Shift", () -> 
+		{
+			gearshift.shiftToOtherGear();
+		
+		});
+		
+		lmLeft.addListener("StartCompressor", () -> 
+		{
+			compressor.start();
+		});
+		
+		lmLeft.addListener("StopCompressor", () -> 
 		{
 			compressor.stop();
 		});
