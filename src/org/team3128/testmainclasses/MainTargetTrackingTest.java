@@ -1,4 +1,4 @@
-package tests;
+package org.team3128.testmainclasses;
 
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.listener.ListenerManager;

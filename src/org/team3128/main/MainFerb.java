@@ -13,8 +13,8 @@ import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
-import org.team3128.main.mechanisms.GearRollerBackDoor;
-import org.team3128.main.mechanisms.Shooter;
+import org.team3128.mechanisms.GearRollerBackDoor;
+import org.team3128.mechanisms.Shooter;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -51,10 +51,10 @@ public class MainFerb extends NarwhalRobot
 	public Victor gearRollerMotor;
 	
 	public ListenerManager lmRight;
-	public ListenerManager lmLeft;
+	//public ListenerManager lmLeft;
 	
 	public Joystick rightJoystick;
-	public Joystick leftJoystick;
+	//public Joystick leftJoystick;
 	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPistons;
@@ -66,22 +66,15 @@ public class MainFerb extends NarwhalRobot
 	
 	@Override
 	protected void constructHardware() {
-		intakeMotors = new MotorGroup();
 		gearMotors = new MotorGroup();
 		gearMotors.addMotor(gearRollerMotor);
+		
+		intakeMotors = new MotorGroup();
 		intakeMotors.addMotor(lowerIntakeMotor);
 		intakeMotors.addMotor(shooterIntakeMotor);
-		gearPiston = new Piston(1, 2);
-		doorPiston = new Piston(3, 4);
-		gearInputSensor = new DigitalInput(5);
-
-		lmRight = new ListenerManager(rightJoystick, leftJoystick);
-		
-		addListenerManager(lmRight);
 		
 		shooter = new Shooter(shooterMotorLeft, intakeMotors);
 		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
-		gearRollerMotor = new Victor(0);
 		
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -94,7 +87,6 @@ public class MainFerb extends NarwhalRobot
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		
-		// Add actual measurements... :)
 		drive = new SRXTankDrive(leftDriveFront, rightDriveBack, (4 * Math.PI)*Length.in, 0, 0, 28.45*Length.in);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -109,8 +101,14 @@ public class MainFerb extends NarwhalRobot
 		gearshift.shiftToHigh();
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 		
-		Log.info("MainFerb", "Activating Ferb");
-        Log.info("MainFerb", "Come on Perry!");
+		lmRight = new ListenerManager(rightJoystick);
+		addListenerManager(lmRight);
+		
+		//lmLeft = new ListenerManager(leftJoystick);
+		//addListenerManager(lmLeft);
+		
+		Log.info("[MainFerb]", "Activating Ferb");
+        Log.info("[MainFerb]", "Hey! Where's Perry?");
 	}
 
 	@Override
@@ -154,30 +152,30 @@ public class MainFerb extends NarwhalRobot
 		});
 		
 		lmRight.addButtonDownListener("StartCompressor", compressor::start);
-		
 		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
 		
 		lmRight.addButtonDownListener("Shoot", shooter::enableShooter);
 		lmRight.addButtonUpListener("Shoot", shooter::disableShooter);
+		
 		lmRight.addButtonDownListener("GearRoller", gearRollerBackDoor::activateLoadingMode);
 		lmRight.addButtonUpListener("GearRoller", gearRollerBackDoor::deactivateLoadingMode);
 	
 		lmRight.addListener("IntakePOV", (POVValue value) -> {
-			
 			switch(value.getDirectionValue())
 			{
-			//sides or center
+			// Sides or Center
 			case 3:
 			case 7:
 			case 0:
 				lowerIntakeMotor.set(0);
 				break;
-			//forwards
+			// Forwards
 			case 1:
 			case 2:
 			case 8:
 				lowerIntakeMotor.set(1);
 				break;
+			// Backwards
 			case 4:
 			case 5:
 			case 6:
@@ -194,6 +192,11 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void autonomousInit() {
+		
+	}
+	
+	@Override
+	protected void updateDashboard() {
 		
 	}
 

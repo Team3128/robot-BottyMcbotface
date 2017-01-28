@@ -1,4 +1,4 @@
-package org.team3128.main.mechanisms;
+package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
@@ -14,6 +14,7 @@ public class GearRollerBackDoor  {
 		SUCKIN,
 		REVERSE;		
 	}
+	
 	Piston doorPiston, gearPiston;
 	MotorGroup gearRoller;
 	DigitalInput digitalInput;
@@ -41,26 +42,36 @@ public class GearRollerBackDoor  {
 	private synchronized void setState(GearState newState)
 	{
 		this.state = newState;
+		
+		if (newState == GearState.INERT) {
+			gearRoller.setTarget(0);
+		}
+		else if (newState == GearState.SUCKIN) {
+			gearRoller.setTarget(-1);
+		}
+		else if (newState == GearState.REVERSE) {
+			gearRoller.setTarget(1);
+		}
 	}
 	
 	public void activateLoadingMode()
 	{
-		setState(GearState.SUCKIN);
 		doorPiston.setPistonOn();
 		gearPiston.setPistonOn();
-		gearRoller.setTarget(-1);
+		
+		setState(GearState.SUCKIN);
 	}
 	
 	private void onGearLimitSwitchTriggered()
 	{
 		setState(GearState.REVERSE);
-		gearRoller.setTarget(1);
+		
 		gearPiston.setPistonOff();
 	}
 	public void deactivateLoadingMode()
 	{
 		setState(GearState.INERT);
-		gearRoller.setTarget(0);
+		
 		doorPiston.setPistonOff();
 	}
 	

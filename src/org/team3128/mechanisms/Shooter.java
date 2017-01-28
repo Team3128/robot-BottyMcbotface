@@ -1,4 +1,4 @@
-package org.team3128.main.mechanisms;
+package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Log;
@@ -66,28 +66,29 @@ public class Shooter
 		launcherWheel.set(0);
 		launcherWheel.disableControl();
 		
-		thread = new Thread(this::turretThread);
+		thread = new Thread(this::shooterThread);
 		thread.start();
 		
 		this.state = ShooterState.STOPPED;
-		}
+	}
 	
 	/**
 	 * Manages turret state in the background.
 	 * Run as a separate thread
 	 */
-	private void turretThread()
+	private void shooterThread()
 	{
-		Log.info("Turret", "Thread Starting...");
+		Log.info("[Shooter]", "Shooter Thread Starting...");
 		while(true)
 		{			
-			//state machine to handle shooter
+			// State machine to handle shooter
 			switch(state)
 			{
 			case STOPPED:
 				if(launchFlag)
 				{
 					state = ShooterState.SPINNING_UP;
+					
 					launcherWheel.enableControl();
 					launcherWheel.set(LAUNCH_WHEEL_SPEED);
 				}
@@ -95,14 +96,16 @@ public class Shooter
 				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR))
 				{
 					state = ShooterState.LAUNCHING;
+					
 					intakeWheel.setTarget(BALL_HOLDER_LAUNCH_SPEED);	
 				}
 			case LAUNCHING:
 				if(!launchFlag)
 				{
+					state = ShooterState.STOPPED;
+					
 					intakeWheel.setTarget(0);
 					launcherWheel.disableControl();
-					state = ShooterState.STOPPED;
 				}
 				
 			}
@@ -110,7 +113,6 @@ public class Shooter
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -148,7 +150,7 @@ public class Shooter
 	}
 	
 	/**
-	 *  Get the state of the turret
+	 *  Get the state of the shooter
 	 * @return
 	 */
 	public ShooterState getState()

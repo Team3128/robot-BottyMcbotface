@@ -1,4 +1,4 @@
-package org.team3128.main.mechanisms;
+package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.POVValue;
