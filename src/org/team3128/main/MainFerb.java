@@ -5,24 +5,39 @@ import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.encoder.both.QuadratureEncoder;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.misc.TwoSpeedGearshift;
+import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.ListenerManager;
+import org.team3128.common.listener.POVValue;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Log;
+import org.team3128.common.util.units.Length;
+import org.team3128.main.mechanisms.GearRollerBackDoor;
+import org.team3128.main.mechanisms.Shooter;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Victor;
 
-public class MainFerb extends NarwhalRobot {
+public class MainFerb extends NarwhalRobot 
+{
+	private final double LOW_GEAR_RATIO = 1;
+	private final double HIGH_GEAR_RATIO = 1;
 	
+	Shooter shooter;
+	GearRollerBackDoor gearRollerBackDoor;
+
 	public SRXTankDrive drive;
+	public DigitalInput gearInputSensor;
+	
+	MotorGroup intakeMotors, gearMotors;
 	
 	public CANTalon leftDriveFront, leftDriveBack;
 	public CANTalon rightDriveFront, rightDriveBack;
@@ -44,18 +59,29 @@ public class MainFerb extends NarwhalRobot {
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPistons;
 	
-	public Piston rightGearPiston, leftGearPiston, topGearPiston; //...
+	public Piston doorPiston, gearPiston;
 
 	public PowerDistributionPanel powerDistPanel;
 	public Compressor compressor;
 	
 	@Override
 	protected void constructHardware() {
-		lmRight = new ListenerManager(rightJoystick);
-		lmLeft = new ListenerManager(leftJoystick);
+		intakeMotors = new MotorGroup();
+		gearMotors = new MotorGroup();
+		gearMotors.addMotor(gearRollerMotor);
+		intakeMotors.addMotor(lowerIntakeMotor);
+		intakeMotors.addMotor(shooterIntakeMotor);
+		gearPiston = new Piston(1, 2);
+		doorPiston = new Piston(3, 4);
+		gearInputSensor = new DigitalInput(5);
+
+		lmRight = new ListenerManager(rightJoystick, leftJoystick);
 		
 		addListenerManager(lmRight);
-		addListenerManager(lmLeft);
+		
+		shooter = new Shooter(shooterMotorLeft, intakeMotors);
+		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
+		gearRollerMotor = new Victor(0);
 		
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -69,7 +95,7 @@ public class MainFerb extends NarwhalRobot {
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		
 		// Add actual measurements... :)
-		drive = new SRXTankDrive(leftDriveFront, rightDriveBack, 0, 0, 0, 0);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveBack, (4 * Math.PI)*Length.in, 0, 0, 28.45*Length.in);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
@@ -79,6 +105,9 @@ public class MainFerb extends NarwhalRobot {
 		
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
+		
+		gearshift.shiftToHigh();
+		drive.setGearRatio(HIGH_GEAR_RATIO);
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Come on Perry!");
@@ -101,21 +130,6 @@ public class MainFerb extends NarwhalRobot {
 		lmRight.nameControl(new Button(11),"GearRoller");
 		lmRight.nameControl(new Button(12),"GearJab");
 		
-		lmLeft.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
-		lmLeft.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
-		lmLeft.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "Shoot");
-				
-		lmLeft.nameControl(new POV(0), "IntakePOV");
-		lmLeft.nameControl(new Button(2),"GearShift");
-		lmLeft.nameControl(new Button(3), "ClearStickyFaults");
-		lmLeft.nameControl(new Button(4),"FullSpeed");
-		lmLeft.nameControl(new Button(7),"Climb");
-		lmLeft.nameControl(new Button(9), "StartCompressor");
-		lmLeft.nameControl(new Button(10), "StopCompressor");
-		lmLeft.nameControl(new Button(11),"GearRoller");
-		lmLeft.nameControl(new Button(12),"GearJab");
-		
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
@@ -124,56 +138,53 @@ public class MainFerb extends NarwhalRobot {
 		
 		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
 		
-		lmRight.addListener("ClearStickyFaults", () ->
-		{
-			powerDistPanel.clearStickyFaults();
-		});
+		lmRight.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
 		
-		lmRight.addListener("Shift", () -> 
-		{
+		lmRight.addButtonDownListener("Shift", () -> {
 			gearshift.shiftToOtherGear();
-		
+			
+			if(gearshift.isInHighGear())
+			{
+				drive.setGearRatio(HIGH_GEAR_RATIO);
+			}
+			else
+			{
+				drive.setGearRatio(LOW_GEAR_RATIO);
+			}
 		});
 		
-		lmRight.addListener("StartCompressor", () -> 
-		{
-			compressor.start();
+		lmRight.addButtonDownListener("StartCompressor", compressor::start);
+		
+		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
+		
+		lmRight.addButtonDownListener("Shoot", shooter::enableShooter);
+		lmRight.addButtonUpListener("Shoot", shooter::disableShooter);
+		lmRight.addButtonDownListener("GearRoller", gearRollerBackDoor::activateLoadingMode);
+		lmRight.addButtonUpListener("GearRoller", gearRollerBackDoor::deactivateLoadingMode);
+	
+		lmRight.addListener("IntakePOV", (POVValue value) -> {
+			
+			switch(value.getDirectionValue())
+			{
+			//sides or center
+			case 3:
+			case 7:
+			case 0:
+				lowerIntakeMotor.set(0);
+				break;
+			//forwards
+			case 1:
+			case 2:
+			case 8:
+				lowerIntakeMotor.set(1);
+				break;
+			case 4:
+			case 5:
+			case 6:
+				lowerIntakeMotor.set(-1);
+				break;
+			}
 		});
-		
-		lmRight.addListener("StopCompressor", () -> 
-		{
-			compressor.stop();
-		});
-		
-		lmLeft.addMultiListener(() -> {
-			drive.arcadeDrive(lmLeft.getAxis("MoveTurn"),
-					lmLeft.getAxis("MoveForwards"),
-					lmLeft.getAxis("Throttle"),
-					lmLeft.getButton("FullSpeed"));
-		
-		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
-		
-		lmLeft.addListener("ClearStickyFaults", () ->
-		{
-			powerDistPanel.clearStickyFaults();
-		});
-		
-		lmLeft.addListener("Shift", () -> 
-		{
-			gearshift.shiftToOtherGear();
-		
-		});
-		
-		lmLeft.addListener("StartCompressor", () -> 
-		{
-			compressor.start();
-		});
-		
-		lmLeft.addListener("StopCompressor", () -> 
-		{
-			compressor.stop();
-		});
-		
 	}
 
 	@Override
