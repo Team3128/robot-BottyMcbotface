@@ -159,6 +159,15 @@ public class MainFerb extends NarwhalRobot
 		
 		lmRight.addButtonDownListener("GearRoller", gearRollerBackDoor::activateLoadingMode);
 		lmRight.addButtonUpListener("GearRoller", gearRollerBackDoor::deactivateLoadingMode);
+		
+		lmRight.addButtonDownListener("Climb", () -> 
+		{
+			lifterMotor.set(1);	
+		});
+		lmRight.addButtonUpListener("Climb", ()->
+		{
+			lifterMotor.set(0);
+		});
 	
 		lmRight.addListener("IntakePOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
