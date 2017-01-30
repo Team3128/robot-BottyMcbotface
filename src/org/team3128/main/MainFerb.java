@@ -73,7 +73,6 @@ public class MainFerb extends NarwhalRobot
 		intakeMotors.addMotor(lowerIntakeMotor);
 		intakeMotors.addMotor(shooterIntakeMotor);
 		
-		shooter = new Shooter(shooterMotorLeft, intakeMotors);
 		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
 		
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -87,7 +86,7 @@ public class MainFerb extends NarwhalRobot
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveBack, (4 * Math.PI)*Length.in, 0, 0, 28.45*Length.in);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveBack, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
@@ -95,12 +94,16 @@ public class MainFerb extends NarwhalRobot
 		shooterMotorLeft.set(shooterMotorRight.getDeviceID());
 		shooterMotorLeft.reverseOutput(true);
 		
+		shooter = new Shooter(shooterMotorRight, intakeMotors);
+
+		
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
 		
 		gearshift.shiftToHigh();
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 		
+		rightJoystick = new Joystick(0);
 		lmRight = new ListenerManager(rightJoystick);
 		addListenerManager(lmRight);
 		
@@ -125,8 +128,8 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(7),"Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
 		lmRight.nameControl(new Button(10), "StopCompressor");
-		lmRight.nameControl(new Button(11),"GearRoller");
-		lmRight.nameControl(new Button(12),"GearJab");
+		lmRight.nameControl(new Button(11),"LoadGear");
+		lmRight.nameControl(new Button(12),"DepositGear");
 		
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(lmRight.getAxis("MoveTurn"),
@@ -138,7 +141,7 @@ public class MainFerb extends NarwhalRobot
 		
 		lmRight.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
 		
-		lmRight.addButtonDownListener("Shift", () -> {
+		lmRight.addButtonDownListener("GearShift", () -> {
 			gearshift.shiftToOtherGear();
 			
 			if(gearshift.isInHighGear())
@@ -157,8 +160,11 @@ public class MainFerb extends NarwhalRobot
 		lmRight.addButtonDownListener("Shoot", shooter::enableShooter);
 		lmRight.addButtonUpListener("Shoot", shooter::disableShooter);
 		
-		lmRight.addButtonDownListener("GearRoller", gearRollerBackDoor::activateLoadingMode);
-		lmRight.addButtonUpListener("GearRoller", gearRollerBackDoor::deactivateLoadingMode);
+		lmRight.addButtonDownListener("LoadGear", gearRollerBackDoor::activateLoadingMode);
+		lmRight.addButtonUpListener("LoadGear", gearRollerBackDoor::deactivateLoadingMode);
+		
+		lmRight.addButtonDownListener("DepositGear", gearRollerBackDoor::activateDepositingMode);
+		lmRight.addButtonUpListener("DepositGear", gearRollerBackDoor::deactivateDepositingMode);
 		
 		lmRight.addButtonDownListener("Climb", () -> 
 		{

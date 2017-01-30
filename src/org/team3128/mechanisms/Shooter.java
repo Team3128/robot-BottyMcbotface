@@ -78,7 +78,7 @@ public class Shooter
 	 */
 	private void shooterThread()
 	{
-		Log.info("[Shooter]", "Shooter Thread Starting...");
+		Log.info("Shooter", "Shooter Thread Starting...");
 		while(true)
 		{			
 			// State machine to handle shooter

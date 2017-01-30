@@ -34,7 +34,7 @@ public class GearRollerBackDoor  {
 		{
 			public void interruptFired(int interruptAssertedMask, Object param) 
 			{
-				onGearLimitSwitchTriggered();
+				digitalInputFired();
 			};
 		});
 	}
@@ -56,24 +56,39 @@ public class GearRollerBackDoor  {
 	
 	public void activateLoadingMode()
 	{
-		doorPiston.setPistonOn();
-		gearPiston.setPistonOn();
-		
 		setState(GearState.SUCKIN);
-	}
-	
-	private void onGearLimitSwitchTriggered()
-	{
-		setState(GearState.REVERSE);
 		
+		doorPiston.setPistonOn();
 		gearPiston.setPistonOff();
 	}
+	
+	private void digitalInputFired()
+	{
+		if (digitalInput.get() == true) 
+		{
+			setState(GearState.REVERSE);
+
+			doorPiston.setPistonOff();
+			gearPiston.setPistonOff();
+		}
+	}
+	
 	public void deactivateLoadingMode()
 	{
 		setState(GearState.INERT);
 		
 		doorPiston.setPistonOff();
+		gearPiston.setPistonOff();
 	}
 	
+	public void activateDepositingMode() {
+		doorPiston.setPistonOff();
+		doorPiston.setPistonOn();
+	}
+	
+	public void deactivateDepositingMode() {
+		doorPiston.setPistonOff();
+		doorPiston.setPistonOff();
+	}
 	
 }
