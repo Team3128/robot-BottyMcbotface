@@ -14,6 +14,7 @@ import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
 import org.team3128.mechanisms.Shooter;
+import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -66,6 +68,14 @@ public class MainFerb extends NarwhalRobot
 	public Compressor compressor;
 	
 	public ADXRS450_Gyro gyro;
+	
+	public NarwhalVisionReceiver visionReceiver;
+	
+	public Servo visionAimServo;
+	
+	// preset aingles for aiming the phone
+	public final static double VISION_SERVO_GEAR_ANGLE = 0;
+	public final static double VISION_SERVO_SHOOTER_ANGLE = .5;
 	
 	@Override
 	protected void constructHardware() {
@@ -111,6 +121,9 @@ public class MainFerb extends NarwhalRobot
 		
 		gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
+		
+		visionReceiver = new NarwhalVisionReceiver();
+		visionAimServo.setAngle(VISION_SERVO_GEAR_ANGLE);
 		
 		//lmLeft = new ListenerManager(leftJoystick);
 		//addListenerManager(lmLeft);

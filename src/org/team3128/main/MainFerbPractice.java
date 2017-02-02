@@ -5,6 +5,7 @@ import org.team3128.common.hardware.misc.Piston;
 import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
 
 public class MainFerbPractice extends MainFerb {
@@ -31,12 +32,14 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront = new CANTalon(1);
 		rightDriveBack = new CANTalon(2);
 		
-		gearPiston = new Piston(0, 6);
-		doorPiston = new Piston(1, 7);
+		gearPiston = new Piston(0, 7);
+		doorPiston = new Piston(1, 6);
 		
 		gearshiftPistons = new Piston(2, 5);
 		
 		gearInputSensor = new DigitalInput(5);
+		
+		visionAimServo = new Servo(9);
 		
 		super.constructHardware();
 	}
