@@ -85,6 +85,17 @@ public class Shooter
 			switch(state)
 			{
 			case STOPPED:
+				synchronized(this)
+				{
+					try 
+					{
+						this.wait();
+					}
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+				}
 				if(launchFlag)
 				{
 					state = ShooterState.SPINNING_UP;
@@ -92,6 +103,8 @@ public class Shooter
 					launcherWheel.enableControl();
 					launcherWheel.set(LAUNCH_WHEEL_SPEED);
 				}
+
+				break;
 			case SPINNING_UP:
 				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR))
 				{
@@ -99,7 +112,28 @@ public class Shooter
 					
 					intakeWheel.setTarget(BALL_HOLDER_LAUNCH_SPEED);	
 				}
+				
+				try 
+				{
+					Thread.sleep(50);
+				}
+				catch (InterruptedException e)
+				{
+					return;
+				}
+				break;
 			case LAUNCHING:
+				synchronized(this)
+				{
+					try 
+					{
+						this.wait();
+					}
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+				}
 				if(!launchFlag)
 				{
 					state = ShooterState.STOPPED;
@@ -107,14 +141,11 @@ public class Shooter
 					intakeWheel.setTarget(0);
 					launcherWheel.disableControl();
 				}
+
+				break;
 				
 			}
 			
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -123,6 +154,8 @@ public class Shooter
 	private synchronized void setLaunchFlag(boolean launchFlag)
 	{
 		this.launchFlag = launchFlag;
+		
+		this.notify();
 	}
 	
 	/**

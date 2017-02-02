@@ -85,12 +85,12 @@ public class GearRollerBackDoor  {
 	
 	public void activateDepositingMode() {
 		doorPiston.setPistonOff();
-		doorPiston.setPistonOn();
+		gearPiston.setPistonOn();
 	}
 	
 	public void deactivateDepositingMode() {
 		doorPiston.setPistonOff();
-		doorPiston.setPistonOff();
+		gearPiston.setPistonOff();
 	}
 	
 }
