@@ -14,7 +14,8 @@ public class MainFerbPractice extends MainFerb {
 	}
 	
 	@Override
-	protected void constructHardware() {
+	public void constructHardware() 
+	{
 		gearRollerMotor = new Victor(0);
 		
 		lowerIntakeMotor = new Victor(1);
@@ -22,18 +23,18 @@ public class MainFerbPractice extends MainFerb {
 		
 		lifterMotor = new Victor(3);
 		
-		shooterMotorRight = new CANTalon(0);
-		shooterMotorLeft = new CANTalon(1);
+		shooterMotorRight = new CANTalon(5);
+		shooterMotorLeft = new CANTalon(6);
 		
-		leftDriveFront = new CANTalon(2);
-		leftDriveBack = new CANTalon(3);
-		rightDriveFront = new CANTalon(4);
-		rightDriveBack = new CANTalon(5);
+		leftDriveFront = new CANTalon(3);
+		leftDriveBack = new CANTalon(4);
+		rightDriveFront = new CANTalon(1);
+		rightDriveBack = new CANTalon(2);
 		
-		gearPiston = new Piston(1, 2);
-		doorPiston = new Piston(3, 4);
+		gearPiston = new Piston(0, 6);
+		doorPiston = new Piston(1, 7);
 		
-		gearshiftPistons = new Piston(5, 6);
+		gearshiftPistons = new Piston(2, 5);
 		
 		gearInputSensor = new DigitalInput(5);
 		

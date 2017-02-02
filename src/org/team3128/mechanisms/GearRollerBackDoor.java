@@ -29,7 +29,6 @@ public class GearRollerBackDoor  {
 		
 		deactivateLoadingMode();
 		
-		digitalInput.enableInterrupts();
 		digitalInput.requestInterrupts(new InterruptHandlerFunction<Object>()
 		{
 			public void interruptFired(int interruptAssertedMask, Object param) 
@@ -37,6 +36,9 @@ public class GearRollerBackDoor  {
 				digitalInputFired();
 			};
 		});
+		
+		digitalInput.enableInterrupts();
+
 	}
 	
 	private synchronized void setState(GearState newState)

@@ -2,7 +2,6 @@ package org.team3128.main;
 
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
-import org.team3128.common.hardware.encoder.both.QuadratureEncoder;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.misc.TwoSpeedGearshift;
 import org.team3128.common.hardware.motor.MotorGroup;
@@ -20,11 +19,13 @@ import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MainFerb extends NarwhalRobot 
 {
@@ -63,6 +64,8 @@ public class MainFerb extends NarwhalRobot
 
 	public PowerDistributionPanel powerDistPanel;
 	public Compressor compressor;
+	
+	public ADXRS450_Gyro gyro;
 	
 	@Override
 	protected void constructHardware() {
@@ -105,7 +108,9 @@ public class MainFerb extends NarwhalRobot
 		
 		rightJoystick = new Joystick(0);
 		lmRight = new ListenerManager(rightJoystick);
-		addListenerManager(lmRight);
+		
+		gyro = new ADXRS450_Gyro();
+		gyro.calibrate();
 		
 		//lmLeft = new ListenerManager(leftJoystick);
 		//addListenerManager(lmLeft);
@@ -198,6 +203,9 @@ public class MainFerb extends NarwhalRobot
 				break;
 			}
 		});
+		
+		addListenerManager(lmRight);
+
 	}
 
 	@Override
@@ -212,7 +220,7 @@ public class MainFerb extends NarwhalRobot
 	
 	@Override
 	protected void updateDashboard() {
-		
+		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 	}
 
 }
