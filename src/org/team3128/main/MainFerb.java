@@ -34,8 +34,8 @@ public class MainFerb extends NarwhalRobot
 	private final double LOW_GEAR_RATIO = 1;
 	private final double HIGH_GEAR_RATIO = 1;
 	
-	Shooter shooter;
-	GearRollerBackDoor gearRollerBackDoor;
+	public Shooter shooter;
+	public GearRollerBackDoor gearRollerBackDoor;
 
 	public SRXTankDrive drive;
 	public DigitalInput gearInputSensor;
