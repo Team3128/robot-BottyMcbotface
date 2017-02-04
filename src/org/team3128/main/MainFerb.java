@@ -73,9 +73,9 @@ public class MainFerb extends NarwhalRobot
 	
 	public Servo visionAimServo;
 	
-	// preset aingles for aiming the phone
+	// preset angles for aiming the phone
 	public final static double VISION_SERVO_GEAR_ANGLE = 0;
-	public final static double VISION_SERVO_SHOOTER_ANGLE = .5;
+	public final static double VISION_SERVO_SHOOTER_ANGLE = 32.53;
 	
 	@Override
 	protected void constructHardware() {
@@ -223,7 +223,7 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void teleopInit() {
-		
+		shooter.disableShooter();
 	}
 
 	@Override

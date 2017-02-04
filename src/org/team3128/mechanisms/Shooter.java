@@ -3,6 +3,7 @@ package org.team3128.mechanisms;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
+import org.team3128.mechanisms.Intake.RollerState;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -10,6 +11,7 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.command.Command;
 
 public class Shooter
 {
@@ -191,5 +193,40 @@ public class Shooter
 		return state;
 	}
 	
+	public class CmdShoot extends Command 
+	{
+		
+		public CmdShoot(int msec)
+		{
+			super(msec / 1000.0);
+		}
+		
+		protected void initialize()
+	    {
+			enableShooter();
+	    }
+
+	    // Called repeatedly when this Command is scheduled to run
+	    protected void execute()
+	    {
+	    }
+
+	    protected boolean isFinished()
+	    {
+	    	//wait for timeout
+	    	return false;
+	    }
+
+	    protected void end()
+	    {
+	    	disableShooter();
+	    }
+
+	    protected void interrupted()
+	    {
+	    	end();
+	    }
+	    
+	}
 	
 }
