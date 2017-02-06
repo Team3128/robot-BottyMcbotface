@@ -49,10 +49,10 @@ public class GearRollerBackDoor  {
 			gearRoller.setTarget(0);
 		}
 		else if (newState == GearState.SUCKIN) {
-			gearRoller.setTarget(-1);
+			gearRoller.setTarget(.4);
 		}
 		else if (newState == GearState.REVERSE) {
-			gearRoller.setTarget(1);
+			gearRoller.setTarget(-.4);
 		}
 	}
 	

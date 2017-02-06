@@ -17,12 +17,12 @@ public class MainFerbPractice extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		gearRollerMotor = new Victor(0);
+		gearRollerMotor = new Victor(2);
 		
 		lowerIntakeMotor = new Victor(1);
-		shooterIntakeMotor = new Victor(2);
+		shooterIntakeMotor = new Victor(3);
 		
-		lifterMotor = new Victor(3);
+		lifterMotor = new Victor(0);
 		
 		shooterMotorRight = new CANTalon(5);
 		shooterMotorLeft = new CANTalon(6);
