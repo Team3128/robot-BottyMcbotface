@@ -150,7 +150,7 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(12),"DepositGear");
 		
 		lmRight.addMultiListener(() -> {
-			drive.arcadeDrive(lmRight.getAxis("MoveTurn"),
+			drive.arcadeDrive(.5 * lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
 					-1 * lmRight.getAxis("Throttle"),
 					lmRight.getButton("FullSpeed"));

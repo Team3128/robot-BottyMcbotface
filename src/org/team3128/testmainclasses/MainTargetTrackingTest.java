@@ -4,6 +4,7 @@ import org.team3128.common.NarwhalRobot;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.util.GenericSendableChooser;
+import org.team3128.common.util.Log;
 import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -37,7 +38,7 @@ public class MainTargetTrackingTest extends NarwhalRobot{
 		@Override
 		protected void teleopPeriodic(){
 			double power = joystick.getRawAxis(ControllerExtreme3D.JOYY.getIndex());
-			//Log.info("info", "The motor power is " + power);
+			Log.info("info", "The motor power is " + power);
 			//trackingServo.setPosition(.5);
 			
 		}

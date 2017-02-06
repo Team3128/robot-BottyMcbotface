@@ -3,14 +3,11 @@ package org.team3128.mechanisms;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
-import org.team3128.mechanisms.Intake.RollerState;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class Shooter
