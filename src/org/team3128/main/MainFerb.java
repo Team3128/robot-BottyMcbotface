@@ -87,7 +87,7 @@ public class MainFerb extends NarwhalRobot
 		intakeMotors.addMotor(shooterIntakeMotor);
 		
 		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
-		
+				
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
@@ -99,6 +99,7 @@ public class MainFerb extends NarwhalRobot
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
@@ -151,7 +152,10 @@ public class MainFerb extends NarwhalRobot
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
+					-1 * lmRight.getAxis("Throttle"),
 					lmRight.getButton("FullSpeed"));
+			
+			//Log.debug("MainFerb", String.format("MoveTurn: %f, MoveForwards: %f, Throttle: %f", lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle")));
 		
 		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
 		
