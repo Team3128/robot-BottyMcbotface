@@ -11,10 +11,11 @@ import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Log;
+import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
+import org.team3128.mechanisms.PhoneCamera;
 import org.team3128.mechanisms.Shooter;
-import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -69,16 +70,20 @@ public class MainFerb extends NarwhalRobot
 	
 	public ADXRS450_Gyro gyro;
 	
-	public NarwhalVisionReceiver visionReceiver;
-	
+	public PhoneCamera phoneCamera;
 	public Servo visionAimServo;
 	
-	// preset angles for aiming the phone
-	public final static double VISION_SERVO_GEAR_ANGLE = 0;
-	public final static double VISION_SERVO_SHOOTER_ANGLE = 32.53;
-	
 	@Override
-	protected void constructHardware() {
+	protected void constructHardware() 
+	{
+		shooterMotorRight = new CANTalon(5);
+		shooterMotorLeft = new CANTalon(6);
+		
+		leftDriveFront = new CANTalon(3);
+		leftDriveBack = new CANTalon(4);
+		rightDriveFront = new CANTalon(1);
+		rightDriveBack = new CANTalon(2);
+		
 		gearMotors = new MotorGroup();
 		gearMotors.addMotor(gearRollerMotor);
 		
@@ -122,8 +127,7 @@ public class MainFerb extends NarwhalRobot
 		gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
 		
-		visionReceiver = new NarwhalVisionReceiver();
-		visionAimServo.setAngle(VISION_SERVO_GEAR_ANGLE);
+		phoneCamera = new PhoneCamera(visionAimServo, new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0));
 		
 		//lmLeft = new ListenerManager(leftJoystick);
 		//addListenerManager(lmLeft);

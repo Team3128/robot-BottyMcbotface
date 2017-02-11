@@ -6,18 +6,18 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
 
-public class MainFerbPractice extends MainFerb {
+public class MainFerbCompetition extends MainFerb {
 	
-	public MainFerbPractice() {
+	public MainFerbCompetition() {
 		super();
 	}
 	
 	@Override
 	public void constructHardware() 
 	{
-		gearRollerMotor = new Victor(2);
+		gearRollerMotor = new Victor(1);
 		
-		lowerIntakeMotor = new Victor(1);
+		lowerIntakeMotor = new Victor(2);
 		shooterIntakeMotor = new Victor(3);
 		
 		lifterMotor = new Victor(0);
@@ -32,7 +32,5 @@ public class MainFerbPractice extends MainFerb {
 		visionAimServo = new Servo(9);
 		
 		super.constructHardware();
-		
-		leftDriveFront.reverseSensor(true);
 	}
 }

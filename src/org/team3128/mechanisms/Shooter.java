@@ -9,6 +9,7 @@ import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter
 {
@@ -16,7 +17,8 @@ public class Shooter
 	public enum ShooterState
 	{
 		LAUNCHING("Launching"), //ball is currently being fired
-		SPINNING_UP("Spinning Up"), //turret is preparing to launch
+		SPINNING_UP("Spinning Up"), //shooter is preparing to launch
+		SPUN_UP("Spun Up"), //shooter is ready to start launching
 		STOPPED("Stopped"); //turret is not doing anything
 		
 		String name;
@@ -79,7 +81,8 @@ public class Shooter
 	{
 		Log.info("Shooter", "Shooter Thread Starting...");
 		while(true)
-		{			
+		{
+			SmartDashboard.putString("Shooter State", state.toString());
 			// State machine to handle shooter
 			switch(state)
 			{
@@ -107,7 +110,7 @@ public class Shooter
 			case SPINNING_UP:
 				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR))
 				{
-					state = ShooterState.LAUNCHING;
+					state = ShooterState.SPUN_UP;
 					
 					intakeWheel.setTarget(BALL_HOLDER_LAUNCH_SPEED);	
 				}
@@ -120,6 +123,10 @@ public class Shooter
 				{
 					return;
 				}
+				break;
+			case SPUN_UP:
+				state = ShooterState.LAUNCHING;
+				
 				break;
 			case LAUNCHING:
 				synchronized(this)
@@ -203,15 +210,13 @@ public class Shooter
 			enableShooter();
 	    }
 
-	    // Called repeatedly when this Command is scheduled to run
 	    protected void execute()
 	    {
 	    }
 
 	    protected boolean isFinished()
 	    {
-	    	//wait for timeout
-	    	return false;
+	    	return isTimedOut();
 	    }
 
 	    protected void end()

@@ -1,7 +1,6 @@
 package org.team3128.autonomous;
 
 import org.team3128.autonomous.commands.CmdAimToHighGoal;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.main.MainFerb;
@@ -20,12 +19,12 @@ public class ShootFromHopperAuto extends CommandGroup
 {
 	public ShootFromHopperAuto(MainFerb robot)
 	{
-		addSequential(new ShootFromHopperAuto(robot));
+		addSequential(new TriggerHopperAuto(robot));
 		
 		addSequential(robot.drive.new CmdMoveForward(1 * Length.ft, 5000, true));
 		addSequential(robot.drive.new CmdInPlaceTurn(75, 5000, Direction.LEFT));
 		
-		addSequential(new CmdAimToHighGoal(robot, new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0), 6000));
+		addSequential(new CmdAimToHighGoal(robot, 6000));
 		addSequential(robot.shooter.new CmdShoot(10000));
 	}
 	
