@@ -15,11 +15,11 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
  * @author Narwhal
  *
  */
-public class ShootFromHopperAuto extends CommandGroup 
+public class AutoShootFromHopper extends CommandGroup 
 {
-	public ShootFromHopperAuto(MainFerb robot)
+	public AutoShootFromHopper(MainFerb robot)
 	{
-		addSequential(new TriggerHopperAuto(robot));
+		addSequential(new AutoTriggerHopper(robot));
 		
 		addSequential(robot.drive.new CmdMoveForward(1 * Length.ft, 5000, true));
 		addSequential(robot.drive.new CmdInPlaceTurn(75, 5000, Direction.LEFT));

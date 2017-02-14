@@ -1,5 +1,9 @@
 package org.team3128.main;
 
+import org.team3128.autonomous.AutoCrossBaseline;
+import org.team3128.autonomous.AutoPlaceFarGear;
+import org.team3128.autonomous.AutoPlaceMiddleGear;
+import org.team3128.autonomous.AutoShootFromHopper;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -10,8 +14,10 @@ import org.team3128.common.listener.POVValue;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
+import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.datatypes.PIDConstants;
+import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
 import org.team3128.mechanisms.PhoneCamera;
@@ -28,6 +34,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MainFerb extends NarwhalRobot 
@@ -112,7 +119,7 @@ public class MainFerb extends NarwhalRobot
 		shooterMotorLeft.set(shooterMotorRight.getDeviceID());
 		shooterMotorLeft.reverseOutput(true);
 		
-		shooter = new Shooter(shooterMotorRight, intakeMotors);
+		shooter = new Shooter(this, shooterMotorRight, intakeMotors);
 
 		
 		powerDistPanel = new PowerDistributionPanel();
@@ -132,8 +139,8 @@ public class MainFerb extends NarwhalRobot
 		//lmLeft = new ListenerManager(leftJoystick);
 		//addListenerManager(lmLeft);
 		
-		Log.info("[MainFerb]", "Activating Ferb");
-        Log.info("[MainFerb]", "Hey! Where's Perry?");
+		Log.info("MainFerb", "Activating Ferb");
+        Log.info("MainFerb", "Hey! Where's Perry?");
 	}
 
 	@Override
@@ -141,17 +148,20 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "Shoot");
+		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "FeedBalls");
 				
 		lmRight.nameControl(new POV(0), "IntakePOV");
-		lmRight.nameControl(new Button(2),"GearShift");
-		lmRight.nameControl(new Button(3), "ClearStickyFaults");
-		lmRight.nameControl(new Button(4),"FullSpeed");
-		lmRight.nameControl(new Button(7),"Climb");
+		lmRight.nameControl(new Button(2), "GearShift");
+		lmRight.nameControl(new Button(3), "ToggleFlywheel");
+		lmRight.nameControl(new Button(4), "FullSpeed");
+		
+		lmRight.nameControl(new Button(5), "LoadGear");
+		lmRight.nameControl(new Button(6), "DepositGear");
+		
+		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
 		lmRight.nameControl(new Button(10), "StopCompressor");
-		lmRight.nameControl(new Button(11),"LoadGear");
-		lmRight.nameControl(new Button(12),"DepositGear");
+		
 		
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(.5 * lmRight.getAxis("MoveTurn"),
@@ -181,8 +191,10 @@ public class MainFerb extends NarwhalRobot
 		lmRight.addButtonDownListener("StartCompressor", compressor::start);
 		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
 		
-		lmRight.addButtonDownListener("Shoot", shooter::enableShooter);
-		lmRight.addButtonUpListener("Shoot", shooter::disableShooter);
+		lmRight.addButtonDownListener("FeedBalls", shooter::enableIntakeRoller);
+		lmRight.addButtonUpListener("FeedBalls", shooter::disableIntakeRoller);
+		
+		lmRight.addButtonDownListener("ToggleFlywheel", shooter::toggleFeed);
 		
 		lmRight.addButtonDownListener("LoadGear", gearRollerBackDoor::activateLoadingMode);
 		lmRight.addButtonUpListener("LoadGear", gearRollerBackDoor::deactivateLoadingMode);
@@ -229,12 +241,22 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void teleopInit() {
-		shooter.disableShooter();
+		shooter.disableIntakeRoller();
+		shooter.disableFlywheel();
 	}
 
 	@Override
 	protected void autonomousInit() {
 		
+	}
+	
+	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser) {
+		programChooser.addDefault("None", null);
+		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
+		programChooser.addObject("Place Left Gear", new AutoPlaceFarGear(this, Direction.LEFT));
+		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
+		programChooser.addObject("Place Right Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
+		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 	}
 	
 	@Override

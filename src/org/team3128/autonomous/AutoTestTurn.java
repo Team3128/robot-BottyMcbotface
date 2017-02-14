@@ -15,9 +15,9 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
  * @author Jamie
  *
  */
-public class TestTurnAuto extends CommandGroup
+public class AutoTestTurn extends CommandGroup
 {
-	public TestTurnAuto(MainFerb robot)
+	public AutoTestTurn(MainFerb robot)
 	{
 		// turn 180 degrees to the right, then back to the left in smaller increments.  Judges will decide how far off the robot is from its original position.
 		addSequential(robot.drive.new CmdInPlaceTurn(180, 5000, Direction.RIGHT));

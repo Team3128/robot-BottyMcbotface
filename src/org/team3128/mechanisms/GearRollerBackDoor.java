@@ -98,12 +98,12 @@ public class GearRollerBackDoor
 		gearPiston.setPistonOff();
 	}
 
-	public class CmdDepositGear extends Command
+	public class CmdSetDepositingMode extends Command
 	{
 
 		boolean depositGear;
 
-		public CmdDepositGear(boolean depositGear)
+		public CmdSetDepositingMode(boolean depositGear)
 		{
 			super(1.5);
 			this.depositGear = depositGear;
