@@ -40,7 +40,7 @@ public class Shooter
 	MotorGroup intakeRoller;
 	MainFerb robot;
 	
-	Command CmdAim = new CmdAimToHighGoal(robot, 6000);
+	Command cmdAim;
 
 	final static double LAUNCH_WHEEL_SPEED = 100; // RPM
 	final static double ALLOWABLE_WHEEL_SPEED_ERROR = 100; //RPM
@@ -64,7 +64,8 @@ public class Shooter
 		this.launcherWheel = launcherWheel;
 		this.intakeRoller = intakeWheel;
 		this.robot = robot;
-
+		this.state = ShooterState.STOPPED;
+		
 		launcherWheel.changeControlMode(TalonControlMode.Speed);
 		launcherWheel.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		launcherWheel.set(0);
@@ -72,8 +73,8 @@ public class Shooter
 
 		thread = new Thread(this::shooterThread);
 		thread.start();
-
-		this.state = ShooterState.STOPPED;
+		
+		cmdAim = new CmdAimToHighGoal(robot, 6000);
 	}
 
 	/**
@@ -113,7 +114,7 @@ public class Shooter
 				break;
 			
 			case SPINNING_UP:
-				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR) && (!CmdAim.isRunning()))
+				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR) && (!cmdAim.isRunning()))
 				{
 					state = ShooterState.SPUN_UP;
 				}
@@ -222,7 +223,7 @@ public class Shooter
 	public void toggleFeed() 
 	{
 		if (state == ShooterState.STOPPED) {
-			CmdAim.start();
+			cmdAim.start();
 			enableFlywheel();
 		}
 		else {

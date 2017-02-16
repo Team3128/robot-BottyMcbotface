@@ -161,6 +161,7 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
 		lmRight.nameControl(new Button(10), "StopCompressor");
+		lmRight.nameControl(new Button(12), "ClearStickyFaults");
 		
 		
 		lmRight.addMultiListener(() -> {
