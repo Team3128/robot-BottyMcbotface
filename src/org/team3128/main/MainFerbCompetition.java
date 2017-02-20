@@ -1,10 +1,11 @@
 package org.team3128.main;
 
 import org.team3128.common.hardware.misc.Piston;
+import org.team3128.common.hardware.motor.MotorGroup;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.VictorSP;
 
 public class MainFerbCompetition extends MainFerb {
 	
@@ -15,13 +16,11 @@ public class MainFerbCompetition extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		gearRollerMotor = new Victor(1);
+		gearRollerMotor = new VictorSP(1);
 		
-		lowerIntakeMotor = new Victor(2);
-		shooterIntakeMotor = new Victor(3);
-		
-		lifterMotor = new Victor(0);
-		
+		floorIntakeMotor = new VictorSP(2);
+		climberMotor = new MotorGroup(new VictorSP(3));
+				
 		gearPiston = new Piston(0, 7);
 		doorPiston = new Piston(1, 6);
 		

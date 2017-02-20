@@ -17,25 +17,35 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
  */
 public class AutoTestTurn extends CommandGroup
 {
-	public AutoTestTurn(MainFerb robot)
+	public enum TurnType {
+		ENCODERS_INPLACE,
+		ENCODERS_ARC,
+		GYRO;
+	}
+	public AutoTestTurn(MainFerb robot, TurnType type)
 	{
 		// turn 180 degrees to the right, then back to the left in smaller increments.  Judges will decide how far off the robot is from its original position.
-		addSequential(robot.drive.new CmdInPlaceTurn(180, 5000, Direction.RIGHT));
-		addSequential(robot.drive.new CmdInPlaceTurn(25, 2000, Direction.LEFT));
-		addSequential(robot.drive.new CmdInPlaceTurn(65, 3000, Direction.LEFT));
-		addSequential(robot.drive.new CmdInPlaceTurn(90, 4000, Direction.LEFT));
-
-		addSequential(robot.drive.new CmdArcTurn(180, 5000, .5, Direction.RIGHT));
-		addSequential(robot.drive.new CmdArcTurn(25, 2000, .5, Direction.LEFT));
-		addSequential(robot.drive.new CmdArcTurn(65, 3000, .5, Direction.LEFT));
-		addSequential(robot.drive.new CmdArcTurn(90, 4000, .5, Direction.LEFT));
-		
-		PIDConstants gyroPIDConstants = new PIDConstants(.001, 0, 0);
-		
-		addSequential(new CmdTurnGyro(robot.gyro, robot.drive, -180, .5, gyroPIDConstants, 5000));
-		addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 25, .5, gyroPIDConstants, 5000));
-		addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 65, .5, gyroPIDConstants, 5000));
-		addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, .5, gyroPIDConstants, 5000));
-
+		if (type == TurnType.ENCODERS_INPLACE)
+		{
+			addSequential(robot.drive.new CmdInPlaceTurn(180, 5000, Direction.RIGHT));
+			addSequential(robot.drive.new CmdInPlaceTurn(25, 2000, Direction.LEFT));
+			addSequential(robot.drive.new CmdInPlaceTurn(65, 3000, Direction.LEFT));
+			addSequential(robot.drive.new CmdInPlaceTurn(90, 4000, Direction.LEFT));
+		}
+		else if (type == TurnType.ENCODERS_ARC)
+		{
+			addSequential(robot.drive.new CmdArcTurn(180, 5000, .5, Direction.RIGHT));
+			addSequential(robot.drive.new CmdArcTurn(25, 2000, .5, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(65, 3000, .5, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(90, 4000, .5, Direction.LEFT));
+		}
+		else {
+			PIDConstants gyroPIDConstants = new PIDConstants(.001, 0, 0);
+			
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, -180, .5, gyroPIDConstants, 5000));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 25, .5, gyroPIDConstants, 5000));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 65, .5, gyroPIDConstants, 5000));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, .5, gyroPIDConstants, 5000));
+		}
 	}
 }

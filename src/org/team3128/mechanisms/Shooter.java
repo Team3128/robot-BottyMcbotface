@@ -1,7 +1,6 @@
 package org.team3128.mechanisms;
 
 import org.team3128.autonomous.commands.CmdAimToHighGoal;
-import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.main.MainFerb;
@@ -37,15 +36,15 @@ public class Shooter
 	}
 
 	CANTalon launcherWheel;
-	MotorGroup intakeRoller;
+	CANTalon intakeRoller;
 	MainFerb robot;
 	
 	Command cmdAim;
 
-	final static double LAUNCH_WHEEL_SPEED = 100; // RPM
+	final static double LAUNCH_WHEEL_SPEED = 3500; // RPM
 	final static double ALLOWABLE_WHEEL_SPEED_ERROR = 100; //RPM
-	final static double SHOOTER_INTAKE_ROLLER_SPEED = 1; //speed to run the shooter intake roller at to feed balls into the shooter
-
+	final static double SHOOTER_INTAKE_ROLLER_SPEED = -.5; //speed to run the shooter intake roller at to feed balls into the shooter
+		
 	private Thread thread;
 
 	boolean feedFlag;
@@ -59,7 +58,7 @@ public class Shooter
 	 * @param launcherWheel
 	 * @param intakeWheel
 	 */
-	public Shooter(MainFerb robot, CANTalon launcherWheel, MotorGroup intakeWheel)
+	public Shooter(MainFerb robot, CANTalon launcherWheel, CANTalon intakeWheel)
 	{
 		this.launcherWheel = launcherWheel;
 		this.intakeRoller = intakeWheel;
@@ -110,13 +109,20 @@ public class Shooter
 					launcherWheel.enableControl();
 					launcherWheel.set(LAUNCH_WHEEL_SPEED);
 				}
-
 				break;
 			
 			case SPINNING_UP:
-				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR) && (!cmdAim.isRunning()))
+				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR)) //&& (!cmdAim.isRunning()))
 				{
 					state = ShooterState.SPUN_UP;
+				}
+				
+				if (!spinFlag) {
+					state = ShooterState.STOPPED;
+					
+					intakeRoller.set(0);
+					launcherWheel.disableControl();
+					continue;
 				}
 
 				try 
@@ -133,13 +139,15 @@ public class Shooter
 				if (feedFlag) {
 					state = ShooterState.LAUNCHING;
 					
-					intakeRoller.setTarget(SHOOTER_INTAKE_ROLLER_SPEED);
+					intakeRoller.set(SHOOTER_INTAKE_ROLLER_SPEED);
+					continue;
 				}
 				else if (!spinFlag) {
 					state = ShooterState.STOPPED;
 					
-					intakeRoller.setTarget(0);
+					intakeRoller.set(0);
 					launcherWheel.disableControl();
+					continue;
 				}
 				
 				synchronized(this)
@@ -172,11 +180,13 @@ public class Shooter
 				if(!feedFlag)
 				{
 					state = ShooterState.SPUN_UP;
+					
+					intakeRoller.set(0);
 				}
 				else if (!spinFlag) {
 					state = ShooterState.STOPPED;
 					
-					intakeRoller.setTarget(0);
+					intakeRoller.set(0);
 					launcherWheel.disableControl();
 				}
 
@@ -205,11 +215,12 @@ public class Shooter
 	}
 
 	/**
-	 * Tell the shooter to spin up and start shooting when it is ready
+	 * Tell the shooter to spin up, but not start shooting
 	 */
 	public void enableFlywheel()
 	{
 		setSpinFlag(true);
+		setFeedFlag(false);
 	}
 
 	/**
@@ -218,12 +229,13 @@ public class Shooter
 	public void disableFlywheel()
 	{
 		setSpinFlag(false);
+		setFeedFlag(false);
 	}
 	
-	public void toggleFeed() 
+	public void toggleFlywheel() 
 	{
 		if (state == ShooterState.STOPPED) {
-			cmdAim.start();
+			//cmdAim.start();
 			enableFlywheel();
 		}
 		else {
@@ -250,15 +262,15 @@ public class Shooter
 	/**
 	 * Tell the shooter to spin up and start shooting when it is ready
 	 */
-	public void enableIntakeRoller()
+	public void enableFeeder()
 	{
 		setFeedFlag(true);
 	}
 
 	/**
-	 * Tell the shooter to spin down
+	 * Tell the shooter to stop feeding balls and spin down
 	 */
-	public void disableIntakeRoller()
+	public void disableFeeder()
 	{
 		setFeedFlag(false);
 	}

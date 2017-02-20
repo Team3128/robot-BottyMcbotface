@@ -1,10 +1,11 @@
 package org.team3128.main;
 
 import org.team3128.common.hardware.misc.Piston;
+import org.team3128.common.hardware.motor.MotorGroup;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.VictorSP;
 
 public class MainFerbPractice extends MainFerb {
 	
@@ -15,24 +16,36 @@ public class MainFerbPractice extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		gearRollerMotor = new Victor(2);
+		gearRollerMotor = new VictorSP(2);
 		
-		lowerIntakeMotor = new Victor(1);
-		shooterIntakeMotor = new Victor(3);
+		floorIntakeMotor = new VictorSP(1);
 		
-		lifterMotor = new Victor(0);
+		climberMotor = new MotorGroup(new VictorSP(3));
+		climberMotor.invert();
 		
-		gearPiston = new Piston(0, 7);
-		doorPiston = new Piston(1, 6);
+		gearPiston = new Piston(3, 4);
+		doorPiston = new Piston(2, 5);
 		
-		gearshiftPistons = new Piston(2, 5);
+		gearshiftPistons = new Piston(1, 6);
+		gearshiftPistons.invertPiston();
 		
 		gearInputSensor = new DigitalInput(5);
 		
 		visionAimServo = new Servo(9);
-		
+						
 		super.constructHardware();
 		
 		leftDriveFront.reverseSensor(true);
+		leftDriveFront.reverseOutput(true);
+		rightDriveFront.reverseSensor(false);
+		rightDriveFront.reverseOutput(false);
+		
+		leftDriveFront.configPeakOutputVoltage(5, -5);
+		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		leftDriveFront.setAllowableClosedLoopErr(64);
+		
+		rightDriveFront.configPeakOutputVoltage(6, -6);
+		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.setAllowableClosedLoopErr(64);
 	}
 }

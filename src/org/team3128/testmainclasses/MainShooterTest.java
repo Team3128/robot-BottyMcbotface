@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class MainShooterTest extends NarwhalRobot
 {
-	CANTalon shooterMotor;
+	CANTalon shooterMotor, followerShooterMotor;
 	VictorSP feederMotor;
 	
 	Joystick joystick;
@@ -25,7 +25,7 @@ public class MainShooterTest extends NarwhalRobot
 	ADXRS450_Gyro gyro;
 	
 	double nativePerRotation = 4096;
-	double desiredSpeed = 10500;
+	double desiredSpeed = 3500;
 	
 	boolean shouldIn = false;
 	boolean shouldCheck = true;
@@ -36,11 +36,16 @@ public class MainShooterTest extends NarwhalRobot
 	
 	@Override
 	protected void constructHardware() {
-		shooterMotor = new CANTalon(0);
+		shooterMotor = new CANTalon(6);
 		//shooterMotor.changeControlMode(TalonControlMode.Speed);
 		shooterMotor.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		shooterMotor.changeControlMode(TalonControlMode.Speed);
 		shooterMotor.reverseSensor(false);	
+		
+		followerShooterMotor = new CANTalon(5);
+		followerShooterMotor.changeControlMode(TalonControlMode.Follower);
+		followerShooterMotor.set(shooterMotor.getDeviceID());
+		
 		
 		feederMotor = new VictorSP(0);
 		
@@ -62,7 +67,6 @@ public class MainShooterTest extends NarwhalRobot
 	@Override
 	public void teleopPeriodic()
 	{
-		feederMotor.set(1.0);
 		shooterMotor.set(desiredSpeed);
 	}
 

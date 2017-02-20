@@ -64,7 +64,7 @@ public class GearRollerBackDoor
 		setState(GearState.SUCKIN);
 
 		doorPiston.setPistonOn();
-		gearPiston.setPistonOff();
+		gearPiston.setPistonOn();
 	}
 
 	private void digitalInputFired()
@@ -74,7 +74,7 @@ public class GearRollerBackDoor
 			setState(GearState.REVERSE);
 
 			doorPiston.setPistonOff();
-			gearPiston.setPistonOff();
+			gearPiston.setPistonOn();
 		}
 	}
 
@@ -83,19 +83,19 @@ public class GearRollerBackDoor
 		setState(GearState.INERT);
 
 		doorPiston.setPistonOff();
-		gearPiston.setPistonOff();
+		gearPiston.setPistonOn();
 	}
 
 	public void activateDepositingMode()
 	{
 		doorPiston.setPistonOff();
-		gearPiston.setPistonOn();
+		gearPiston.setPistonOff();
 	}
 
 	public void deactivateDepositingMode()
 	{
 		doorPiston.setPistonOff();
-		gearPiston.setPistonOff();
+		gearPiston.setPistonOn();
 	}
 
 	public class CmdSetDepositingMode extends Command
@@ -135,6 +135,12 @@ public class GearRollerBackDoor
 		protected void end()
 		{
 
+		}
+		
+		@Override
+		protected void interrupted()
+		{
+			end();
 		}
 
 		@Override
