@@ -21,10 +21,10 @@ public class MainFerbCompetition extends MainFerb {
 		floorIntakeMotor = new VictorSP(2);
 		climberMotor = new MotorGroup(new VictorSP(3));
 				
-		gearPiston = new Piston(0, 7);
+		gearPiston = new Piston(2, 5);
 		doorPiston = new Piston(1, 6);
 		
-		gearshiftPistons = new Piston(2, 5);
+		gearshiftPistons = new Piston(0, 7);
 		
 		gearInputSensor = new DigitalInput(5);
 		
