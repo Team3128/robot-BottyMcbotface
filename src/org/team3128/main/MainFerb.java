@@ -18,6 +18,7 @@ import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
+import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
@@ -46,7 +47,7 @@ public class MainFerb extends NarwhalRobot
 	
 	private boolean fullSpeed = false;
 	
-	public void flipFullSpeed()
+	public void toggleFullSpeed()
 	{
 		fullSpeed = !fullSpeed;
 	}
@@ -181,7 +182,7 @@ public class MainFerb extends NarwhalRobot
 		
 		
 		lmRight.addMultiListener(() -> {
-			drive.arcadeDrive(.5 * lmRight.getAxis("MoveTurn"),
+			drive.arcadeDrive(/*.5 * */lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
 					-1 * lmRight.getAxis("Throttle"),
 					fullSpeed);
@@ -192,7 +193,7 @@ public class MainFerb extends NarwhalRobot
 		
 		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
 		
-		lmRight.addButtonDownListener("FullSpeed", this::flipFullSpeed);
+		lmRight.addButtonDownListener("FullSpeed", this::toggleFullSpeed);
 		
 		lmRight.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
 		
@@ -288,7 +289,8 @@ public class MainFerb extends NarwhalRobot
 	
 	@Override
 	protected void updateDashboard() {
-		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+		SmartDashboard.putNumber("Gyro Angle", RobotMath.normalizeAngle(gyro.getAngle()));
+		SmartDashboard.putBoolean("Full Speed?", fullSpeed);
 		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High" : "Low");
 		SmartDashboard.putNumber("Shooter RPM", shooterMotorRight.getSpeed());
 		SmartDashboard.putNumber("Elevator Current", pdp.getCurrent(ELEVATOR_PDP_PORT));
