@@ -27,17 +27,20 @@ public class AutoTestTurn extends CommandGroup
 		// turn 180 degrees to the right, then back to the left in smaller increments.  Judges will decide how far off the robot is from its original position.
 		if (type == TurnType.ENCODERS_INPLACE)
 		{
-			addSequential(robot.drive.new CmdInPlaceTurn(180, 5000, Direction.RIGHT));
-			addSequential(robot.drive.new CmdInPlaceTurn(25, 2000, Direction.LEFT));
-			addSequential(robot.drive.new CmdInPlaceTurn(65, 3000, Direction.LEFT));
-			addSequential(robot.drive.new CmdInPlaceTurn(90, 4000, Direction.LEFT));
+			addSequential(robot.drive.new CmdInPlaceTurn(90, 5000, Direction.RIGHT));
+			//addSequential(robot.drive.new CmdMoveForward(2 * Length.m, 5000, false));
+			//addSequential(robot.drive.new CmdInPlaceTurn(25, 2000, Direction.LEFT));
+			//addSequential(robot.drive.new CmdInPlaceTurn(65, 3000, Direction.LEFT));
+			//addSequential(robot.drive.new CmdMoveForward(1 * Length.m, 5000, false));
+
+			//addSequential(robot.drive.new CmdInPlaceTurn(90, 4000, Direction.LEFT));
 		}
 		else if (type == TurnType.ENCODERS_ARC)
 		{
-			addSequential(robot.drive.new CmdArcTurn(180, 5000, .5, Direction.RIGHT));
-			addSequential(robot.drive.new CmdArcTurn(25, 2000, .5, Direction.LEFT));
-			addSequential(robot.drive.new CmdArcTurn(65, 3000, .5, Direction.LEFT));
-			addSequential(robot.drive.new CmdArcTurn(90, 4000, .5, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(190, 5000, .5, Direction.RIGHT));
+			addSequential(robot.drive.new CmdArcTurn(30, 2000, .5, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(70, 3000, .5, Direction.LEFT));
+			//addSequential(robot.drive.new CmdArcTurn(90, 4000, .5, Direction.LEFT));
 		}
 		else {
 			PIDConstants gyroPIDConstants = new PIDConstants(.001, 0, 0);

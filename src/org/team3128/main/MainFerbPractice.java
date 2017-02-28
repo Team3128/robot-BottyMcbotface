@@ -16,11 +16,11 @@ public class MainFerbPractice extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		gearRollerMotor = new VictorSP(2);
+		gearMotors = new MotorGroup(new VictorSP(2));
 		
 		floorIntakeMotor = new VictorSP(1);
 		
-		climberMotor = new MotorGroup(new VictorSP(3));
+		climberMotor = new MotorGroup(new VictorSP(0));
 		climberMotor.invert();
 		
 		gearPiston = new Piston(3, 4);
@@ -40,12 +40,12 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront.reverseSensor(false);
 		rightDriveFront.reverseOutput(false);
 		
-		leftDriveFront.configPeakOutputVoltage(5, -5);
+		leftDriveFront.configPeakOutputVoltage(6, -6);
 		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		leftDriveFront.setAllowableClosedLoopErr(64);
+		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configPeakOutputVoltage(6, -6);
+		rightDriveFront.configPeakOutputVoltage(4.5, -4.5);
 		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		rightDriveFront.setAllowableClosedLoopErr(64);
+		rightDriveFront.setAllowableClosedLoopErr(32);
 	}
 }

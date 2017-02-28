@@ -25,8 +25,8 @@ public class MainDriveEncCalibration extends NarwhalRobot
 	
 	@Override
 	protected void constructHardware() {
-		driveMotor = new CANTalon(3);
-		driveMotor2 = new CANTalon(4);
+		driveMotor = new CANTalon(1);
+		driveMotor2 = new CANTalon(2);
 		
 		driveMotor.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		driveMotor.changeControlMode(TalonControlMode.Position);

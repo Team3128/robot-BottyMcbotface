@@ -67,9 +67,7 @@ public class MainFerb extends NarwhalRobot
 
 	public CANTalon elevatorMotor;	
 	public VictorSP floorIntakeMotor;
-	
-	public VictorSP gearRollerMotor;
-	
+		
 	public MotorGroup climberMotor;
 	
 	public ListenerManager lmRight;
@@ -108,9 +106,6 @@ public class MainFerb extends NarwhalRobot
 		
 		elevatorMotor = new CANTalon(7);
 		elevatorMotor.changeControlMode(TalonControlMode.PercentVbus);
-		
-		gearMotors = new MotorGroup();
-		gearMotors.addMotor(gearRollerMotor);
 		
 		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
 				
@@ -294,6 +289,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High" : "Low");
 		SmartDashboard.putNumber("Shooter RPM", shooterMotorRight.getSpeed());
 		SmartDashboard.putNumber("Elevator Current", pdp.getCurrent(ELEVATOR_PDP_PORT));
+		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 	}
 
 	@Override
