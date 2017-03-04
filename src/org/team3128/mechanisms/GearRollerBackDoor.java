@@ -143,6 +143,7 @@ public class GearRollerBackDoor
 			end();
 		}
 
+		
 		@Override
 		protected boolean isFinished()
 		{

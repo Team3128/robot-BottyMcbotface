@@ -87,7 +87,7 @@ public class MainFerb extends NarwhalRobot
 	public ADXRS450_Gyro gyro;
 	
 	public PhoneCamera phoneCamera;
-	public Servo visionAimServo;
+	// public Servo visionAimServo;
 	
 
 	final static int ELEVATOR_PDP_PORT = 12;
@@ -141,7 +141,7 @@ public class MainFerb extends NarwhalRobot
 		gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
 		
-		phoneCamera = new PhoneCamera(visionAimServo, new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0));
+		phoneCamera = new PhoneCamera(new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0));
 		
 		shooter = new Shooter(this, shooterMotorRight, elevatorMotor);
 		

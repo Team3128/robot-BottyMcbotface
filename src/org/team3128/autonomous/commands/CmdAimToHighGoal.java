@@ -4,7 +4,6 @@ import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.main.MainFerb;
 import org.team3128.mechanisms.PhoneCamera;
 import org.team3128.mechanisms.PhoneCamera.AimDirection;
-import org.team3128.mechanisms.PhoneCamera.AimMode;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -30,7 +29,6 @@ public class CmdAimToHighGoal extends Command
 	public void initialize()
 	{
 		drive.stopMovement();
-		phoneCamera.setMode(AimMode.SHOOTER);
 	}
 	
 	@Override

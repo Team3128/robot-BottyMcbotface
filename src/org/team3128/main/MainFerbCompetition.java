@@ -30,7 +30,7 @@ public class MainFerbCompetition extends MainFerb {
 		
 		gearInputSensor = new DigitalInput(5);
 		
-		visionAimServo = new Servo(9);
+//		visionAimServo = new Servo(9);
 		
 		super.constructHardware();
 		

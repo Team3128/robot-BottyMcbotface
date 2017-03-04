@@ -12,7 +12,7 @@ public class AutoPlaceMiddleGear extends CommandGroup
 		addSequential(robot.drive.new CmdMoveForward(-104 * Length.in, 6000, 0.5));
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
 		
-		addSequential(robot.drive.new CmdMoveForward(36 * Length.in, 6000, 0.5));
+		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 6000, 0.5));
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
 	}
 }
