@@ -1,9 +1,11 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoCrossBaseline;
-import org.team3128.autonomous.AutoPlaceFarGear;
+import org.team3128.autonomous.AutoPlaceGearFromRetrievalZone;
+import org.team3128.autonomous.AutoPlaceGearFromKey;
 import org.team3128.autonomous.AutoPlaceMiddleGear;
 import org.team3128.autonomous.AutoShootFromHopper;
+import org.team3128.autonomous.AutoTestDepositGear;
 import org.team3128.autonomous.AutoTestTurn;
 import org.team3128.autonomous.AutoTestTurn.TurnType;
 import org.team3128.common.NarwhalRobot;
@@ -20,7 +22,6 @@ import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.datatypes.PIDConstants;
-import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
 import org.team3128.mechanisms.PhoneCamera;
@@ -35,7 +36,6 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -270,10 +270,12 @@ public class MainFerb extends NarwhalRobot
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser) {
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
-		programChooser.addObject("Place Left Gear", new AutoPlaceFarGear(this, Direction.LEFT));
+		programChooser.addObject("Place Left Gear", new AutoPlaceGearFromRetrievalZone(this));
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
-		programChooser.addObject("Place Right Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
+		programChooser.addObject("Place Right Gear", new AutoPlaceGearFromKey(this));
 		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
+		
+		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
 		
 		programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
 		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));

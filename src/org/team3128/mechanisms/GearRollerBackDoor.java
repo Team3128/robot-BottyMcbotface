@@ -116,7 +116,7 @@ public class GearRollerBackDoor
 			if (depositGear == true)
 			{
 				activateDepositingMode();
-			} else if (depositGear == false)
+			} else
 			{
 				deactivateDepositingMode();
 			}

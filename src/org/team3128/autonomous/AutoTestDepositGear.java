@@ -5,13 +5,13 @@ import org.team3128.main.MainFerb;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
-public class AutoPlaceMiddleGear extends CommandGroup
+public class AutoTestDepositGear extends CommandGroup
 {
-	public AutoPlaceMiddleGear(MainFerb robot){
-		addSequential(robot.drive.new CmdMoveForward(-70 * Length.in, 6000, 0.5));
+	public AutoTestDepositGear(MainFerb robot){
+		
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
 		
-		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 6000, 0.5));
+		addSequential(robot.drive.new CmdMoveForward(4 * Length.in, 6000, 0.5));
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
 	}
 }
