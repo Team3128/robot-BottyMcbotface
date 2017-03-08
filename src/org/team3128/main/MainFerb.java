@@ -1,8 +1,8 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoCrossBaseline;
-import org.team3128.autonomous.AutoPlaceGearFromRetrievalZone;
 import org.team3128.autonomous.AutoPlaceGearFromKey;
+import org.team3128.autonomous.AutoPlaceGearFromRetrievalZone;
 import org.team3128.autonomous.AutoPlaceMiddleGear;
 import org.team3128.autonomous.AutoShootFromHopper;
 import org.team3128.autonomous.AutoTestDepositGear;
@@ -292,6 +292,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Shooter RPM", shooterMotorRight.getSpeed());
 		SmartDashboard.putNumber("Elevator Current", pdp.getCurrent(ELEVATOR_PDP_PORT));
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
+		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
 	}
 
 	@Override
