@@ -37,9 +37,9 @@ public class AutoTestTurn extends CommandGroup
 		}
 		else if (type == TurnType.ENCODERS_ARC)
 		{
-			addSequential(robot.drive.new CmdArcTurn(190, 5000, .5, Direction.RIGHT));
-			addSequential(robot.drive.new CmdArcTurn(30, 2000, .5, Direction.LEFT));
-			addSequential(robot.drive.new CmdArcTurn(70, 3000, .5, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(190, 5000, Direction.RIGHT));
+			addSequential(robot.drive.new CmdArcTurn(30, 2000, Direction.LEFT));
+			addSequential(robot.drive.new CmdArcTurn(70, 3000, Direction.LEFT));
 			//addSequential(robot.drive.new CmdArcTurn(90, 4000, .5, Direction.LEFT));
 		}
 		else {

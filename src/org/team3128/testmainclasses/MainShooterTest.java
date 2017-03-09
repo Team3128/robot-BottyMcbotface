@@ -25,7 +25,7 @@ public class MainShooterTest extends NarwhalRobot
 	ADXRS450_Gyro gyro;
 	
 	double nativePerRotation = 4096;
-	double desiredSpeed = 3500;
+	double desiredSpeed = 3000;
 	
 	boolean shouldIn = false;
 	boolean shouldCheck = true;

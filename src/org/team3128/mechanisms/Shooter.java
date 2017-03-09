@@ -112,7 +112,7 @@ public class Shooter
 				break;
 			
 			case SPINNING_UP:
-				if((RobotMath.abs(launcherWheel.getClosedLoopError()) < ALLOWABLE_WHEEL_SPEED_ERROR)) //&& (!cmdAim.isRunning()))
+				if((RobotMath.abs(launcherWheel.getSpeed() - LAUNCH_WHEEL_SPEED) < ALLOWABLE_WHEEL_SPEED_ERROR)) //&& (!cmdAim.isRunning()))
 				{
 					state = ShooterState.SPUN_UP;
 				}

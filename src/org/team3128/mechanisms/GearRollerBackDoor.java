@@ -105,7 +105,7 @@ public class GearRollerBackDoor
 
 		public CmdSetDepositingMode(boolean depositGear)
 		{
-			super(1.5);
+			super(1);
 			this.depositGear = depositGear;
 		}
 

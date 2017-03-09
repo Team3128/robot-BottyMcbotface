@@ -3,7 +3,6 @@ package org.team3128.main;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
 
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -40,21 +39,21 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront.reverseSensor(false);
 		rightDriveFront.reverseOutput(false);
 		
-		leftDriveFront.configPeakOutputVoltage(6, -6);
-		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		leftDriveFront.configPeakOutputVoltage(9.5, -9.5);
+		leftDriveFront.configNominalOutputVoltage(2, -2);
 		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configPeakOutputVoltage(6, -6);
-		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.configPeakOutputVoltage(10, -10);
+		rightDriveFront.configNominalOutputVoltage(2, -2);
 		rightDriveFront.setAllowableClosedLoopErr(32);
 		
-		CameraServer cameraServer = CameraServer.getInstance();
+		//CameraServer cameraServer = CameraServer.getInstance();
 		
 //		UsbCamera camera = cameraServer.startAutomaticCapture(0);
 //   	camera.setResolution(120, 80);
 //		camera.setFPS(20);
 		
-		cameraServer.startAutomaticCapture(0).setFPS(20);
+		//cameraServer.startAutomaticCapture(0).setFPS(20);
 		
 	}
 }

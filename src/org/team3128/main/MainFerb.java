@@ -34,6 +34,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -89,6 +90,7 @@ public class MainFerb extends NarwhalRobot
 	public PhoneCamera phoneCamera;
 	// public Servo visionAimServo;
 	
+	public GenericSendableChooser<Alliance> allianceChooser;
 
 	final static int ELEVATOR_PDP_PORT = 12;
 	public PowerDistributionPanel pdp;
@@ -119,6 +121,7 @@ public class MainFerb extends NarwhalRobot
 		rightDriveBack.set(rightDriveFront.getDeviceID());
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
+		gearshift.shiftToLow();
 		
 		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in);
 		
@@ -149,6 +152,11 @@ public class MainFerb extends NarwhalRobot
 		//addListenerManager(lmLeft);
 		
 		pdp = new PowerDistributionPanel();
+		
+		allianceChooser = new GenericSendableChooser<>();
+		allianceChooser.addDefault("Red", Alliance.Red);
+		allianceChooser.addObject("Blue", Alliance.Blue);
+        SmartDashboard.putData("allianceChooser", allianceChooser);
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
@@ -267,12 +275,15 @@ public class MainFerb extends NarwhalRobot
 		
 	}
 	
-	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser) {
+	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
+	{
+		Alliance currAlliance = allianceChooser.getSelected();
+		
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
-		programChooser.addObject("Place Left Gear", new AutoPlaceGearFromRetrievalZone(this));
+		programChooser.addObject("Place Gear From Retrieval Zone", new AutoPlaceGearFromRetrievalZone(this, currAlliance));
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
-		programChooser.addObject("Place Right Gear", new AutoPlaceGearFromKey(this));
+		programChooser.addObject("Place Gear From Key", new AutoPlaceGearFromKey(this, currAlliance));
 		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 		
 		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
