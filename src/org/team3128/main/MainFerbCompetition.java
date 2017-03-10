@@ -42,10 +42,12 @@ public class MainFerbCompetition extends MainFerb {
 		leftDriveFront.configPeakOutputVoltage(10, -10);
 		leftDriveFront.configNominalOutputVoltage(2, -2);
 		leftDriveFront.setAllowableClosedLoopErr(64);
+		leftDriveFront.setF(0.2871);
 		
 		rightDriveFront.configPeakOutputVoltage(10, -10);
 		rightDriveFront.configNominalOutputVoltage(2, -2);
 		rightDriveFront.setAllowableClosedLoopErr(64);
+		rightDriveFront.setF(0.2887);
 		
 		CameraServer cameraServer = CameraServer.getInstance();
 		

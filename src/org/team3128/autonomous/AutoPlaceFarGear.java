@@ -16,12 +16,12 @@ public class AutoPlaceFarGear extends CommandGroup
 		double segment_one = 129 * Length.in - robot_half_length - (net_horizontal / Math.sqrt(3)) - arc_turn_reduction;
 		double segment_two = ((2 / Math.sqrt(3)) * net_horizontal) - robot_half_length - arc_turn_reduction;
 		
-		double segment_one_inch_offset = 4 * Length.in;
-		double segment_two_inch_offset = 8 * Length.in;
+		double segment_one_inch_offset = 0 * Length.in;
+		double segment_two_inch_offset = 0 * Length.in;
 		
-		addSequential(robot.drive.new CmdMoveForward(-1 * (segment_one + segment_one_inch_offset), 4000, 0.5));
+		addSequential(robot.drive.new CmdMoveForward(-1 * (segment_one + segment_one_inch_offset), 4000, 0.65));
 		addSequential(robot.drive.new CmdArcTurn(-60, 1500, (side == Direction.RIGHT) ? Direction.LEFT : Direction.RIGHT));
-		addSequential(robot.drive.new CmdMoveForward(-1 * (segment_two + segment_two_inch_offset), 3000, 0.50));
+		addSequential(robot.drive.new CmdMoveForward(-1 * (segment_two + segment_two_inch_offset), 3000, 0.65));
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
 		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 6000, 0.5));
 		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
