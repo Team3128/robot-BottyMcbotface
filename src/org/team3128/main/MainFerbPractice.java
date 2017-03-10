@@ -33,7 +33,8 @@ public class MainFerbPractice extends MainFerb {
 		// visionAimServo = new Servo(9);
 						
 		super.constructHardware();
-		
+		compressor.stop();
+
 		leftDriveFront.reverseSensor(true);
 		leftDriveFront.reverseOutput(true);
 		rightDriveFront.reverseSensor(false);

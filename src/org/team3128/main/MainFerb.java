@@ -1,13 +1,9 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoCrossBaseline;
-import org.team3128.autonomous.AutoPlaceGearFromKey;
-import org.team3128.autonomous.AutoPlaceGearFromRetrievalZone;
+import org.team3128.autonomous.AutoPlaceFarGear;
 import org.team3128.autonomous.AutoPlaceMiddleGear;
 import org.team3128.autonomous.AutoShootFromHopper;
-import org.team3128.autonomous.AutoTestDepositGear;
-import org.team3128.autonomous.AutoTestTurn;
-import org.team3128.autonomous.AutoTestTurn.TurnType;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -22,6 +18,7 @@ import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.datatypes.PIDConstants;
+import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
 import org.team3128.mechanisms.PhoneCamera;
@@ -133,7 +130,6 @@ public class MainFerb extends NarwhalRobot
 		
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
-		compressor.stop();
 		
 		gearshift.shiftToHigh();
 		drive.setGearRatio(HIGH_GEAR_RATIO);
@@ -277,20 +273,21 @@ public class MainFerb extends NarwhalRobot
 	
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
 	{
-		Alliance currAlliance = allianceChooser.getSelected();
+		//Alliance currAlliance = allianceChooser.getSelected();
 		
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
-		programChooser.addObject("Place Gear From Retrieval Zone", new AutoPlaceGearFromRetrievalZone(this, currAlliance));
+		//programChooser.addObject("Place Gear From Retrieval Zone", new AutoPlaceGearFromRetrievalZone(this, currAlliance));
+		//programChooser.addObject("Place Gear From Key", new AutoPlaceGearFromKey(this, currAlliance));
+		programChooser.addObject("Place Right Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
+		programChooser.addObject("Place Left Gear", new AutoPlaceFarGear(this, Direction.LEFT));
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
-		programChooser.addObject("Place Gear From Key", new AutoPlaceGearFromKey(this, currAlliance));
 		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 		
-		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
-		
-		programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
-		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
-		programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
+//		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
+//		programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
+//		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
+//		programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
 
 
 	}

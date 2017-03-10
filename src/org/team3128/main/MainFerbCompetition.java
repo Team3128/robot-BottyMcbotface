@@ -3,8 +3,8 @@ package org.team3128.main;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 
 public class MainFerbCompetition extends MainFerb {
@@ -34,16 +34,21 @@ public class MainFerbCompetition extends MainFerb {
 		
 		super.constructHardware();
 		
-		rightDriveFront.reverseSensor(true);
+		leftDriveFront.reverseSensor(true);
+		leftDriveFront.reverseOutput(true);
 		
-		drive.setReversedAutonomous(false);
+		drive.setReversedAutonomous(true);
 		
-		leftDriveFront.configPeakOutputVoltage(6, -6);
-		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		leftDriveFront.configPeakOutputVoltage(10, -10);
+		leftDriveFront.configNominalOutputVoltage(2, -2);
 		leftDriveFront.setAllowableClosedLoopErr(64);
 		
-		rightDriveFront.configPeakOutputVoltage(6, -6);
-		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.configPeakOutputVoltage(10, -10);
+		rightDriveFront.configNominalOutputVoltage(2, -2);
 		rightDriveFront.setAllowableClosedLoopErr(64);
+		
+		CameraServer cameraServer = CameraServer.getInstance();
+		
+		cameraServer.startAutomaticCapture(0).setFPS(20);
 	}
 }
