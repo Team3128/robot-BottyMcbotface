@@ -31,6 +31,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -92,6 +93,9 @@ public class MainFerb extends NarwhalRobot
 	final static int ELEVATOR_PDP_PORT = 12;
 	public PowerDistributionPanel pdp;
 	
+	public DigitalOutput lightSignal;
+	public boolean scaleLights = false;
+	
 	@Override
 	protected void constructHardware() 
 	{
@@ -131,7 +135,6 @@ public class MainFerb extends NarwhalRobot
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
 		
-		gearshift.shiftToHigh();
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 		
 		rightJoystick = new Joystick(0);
@@ -177,6 +180,7 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
 		lmRight.nameControl(new Button(10), "StopCompressor");
+		lmRight.nameControl(new Button(11), "ScaleLights");
 		lmRight.nameControl(new Button(12), "ClearStickyFaults");
 		
 		
@@ -225,13 +229,17 @@ public class MainFerb extends NarwhalRobot
 		
 		lmRight.addButtonDownListener("Climb", () -> 
 		{
+			gearRollerBackDoor.activateDepositingMode();
 			climberMotor.setTarget(1);	
 		});
 		lmRight.addButtonUpListener("Climb", ()->
 		{
+			gearRollerBackDoor.deactivateDepositingMode();
 			climberMotor.setTarget(0);
 		});
-	
+		
+		lmRight.addButtonDownListener("ScaleLights", this::enableScaleLights);
+		lmRight.addButtonUpListener("ScaleLights", this::disableScaleLights);
 		lmRight.addListener("IntakePOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
 			{
@@ -272,15 +280,13 @@ public class MainFerb extends NarwhalRobot
 	}
 	
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
-	{
-		//Alliance currAlliance = allianceChooser.getSelected();
-		
+	{		
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
 		//programChooser.addObject("Place Gear From Retrieval Zone", new AutoPlaceGearFromRetrievalZone(this, currAlliance));
 		//programChooser.addObject("Place Gear From Key", new AutoPlaceGearFromKey(this, currAlliance));
-		programChooser.addObject("Place Right Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
-		programChooser.addObject("Place Left Gear", new AutoPlaceFarGear(this, Direction.LEFT));
+		programChooser.addObject("Turn Right Far Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
+		programChooser.addObject("Turn Left Far Gear", new AutoPlaceFarGear(this, Direction.LEFT));
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
 		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 		
@@ -320,5 +326,15 @@ public class MainFerb extends NarwhalRobot
 			shooter.disableFeeder();
 			shooter.disableFlywheel();
 		}
+	}
+	
+	public void enableScaleLights()
+	{
+		lightSignal.set(true);
+	}
+	
+	public void disableScaleLights()
+	{
+		lightSignal.set(false);
 	}
 }

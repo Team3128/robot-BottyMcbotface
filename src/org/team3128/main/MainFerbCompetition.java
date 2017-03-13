@@ -5,6 +5,7 @@ import org.team3128.common.hardware.motor.MotorGroup;
 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.VictorSP;
 
 public class MainFerbCompetition extends MainFerb {
@@ -32,6 +33,8 @@ public class MainFerbCompetition extends MainFerb {
 		
 //		visionAimServo = new Servo(9);
 		
+		lightSignal = new DigitalOutput(0);
+		
 		super.constructHardware();
 		
 		leftDriveFront.reverseSensor(true);
@@ -39,18 +42,22 @@ public class MainFerbCompetition extends MainFerb {
 		
 		drive.setReversedAutonomous(true);
 		
-		leftDriveFront.configPeakOutputVoltage(10, -10);
-		leftDriveFront.configNominalOutputVoltage(2, -2);
-		leftDriveFront.setAllowableClosedLoopErr(64);
-		leftDriveFront.setF(0.2871);
-		
-		rightDriveFront.configPeakOutputVoltage(10, -10);
-		rightDriveFront.configNominalOutputVoltage(2, -2);
-		rightDriveFront.setAllowableClosedLoopErr(64);
-		rightDriveFront.setF(0.2887);
 		
 		CameraServer cameraServer = CameraServer.getInstance();
 		
 		cameraServer.startAutomaticCapture(0).setFPS(20);
+	}
+	
+	@Override
+	protected void disabledPeriodic()
+	{
+		super.disabledPeriodic();
+		leftDriveFront.configPeakOutputVoltage(10 , -10);
+		leftDriveFront.configNominalOutputVoltage(2, -2);
+		leftDriveFront.setAllowableClosedLoopErr(32);
+		
+		rightDriveFront.configPeakOutputVoltage(9.5, -9.5);
+		rightDriveFront.configNominalOutputVoltage(2, -2);
+		rightDriveFront.setAllowableClosedLoopErr(64);
 	}
 }
