@@ -124,7 +124,7 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in, 380);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		

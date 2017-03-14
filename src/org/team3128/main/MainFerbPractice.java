@@ -40,13 +40,13 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront.reverseSensor(false);
 		rightDriveFront.reverseOutput(false);
 		
-		leftDriveFront.configPeakOutputVoltage(10, -10);
-		leftDriveFront.configNominalOutputVoltage(2, -2);
+		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
 		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configPeakOutputVoltage(10, -10);
-		rightDriveFront.configNominalOutputVoltage(2, -2);
-		rightDriveFront.setAllowableClosedLoopErr(64);
+		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.setAllowableClosedLoopErr(32);
+		
+		drive.setRightSpeedScalar(1);
 		
 		//CameraServer cameraServer = CameraServer.getInstance();
 		
