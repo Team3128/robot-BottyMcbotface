@@ -40,14 +40,6 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront.reverseSensor(false);
 		rightDriveFront.reverseOutput(false);
 		
-		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		leftDriveFront.setAllowableClosedLoopErr(32);
-		
-		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		rightDriveFront.setAllowableClosedLoopErr(32);
-		
-		drive.setRightSpeedScalar(1);
-		
 		//CameraServer cameraServer = CameraServer.getInstance();
 		
 //		UsbCamera camera = cameraServer.startAutomaticCapture(0);
@@ -55,6 +47,17 @@ public class MainFerbPractice extends MainFerb {
 //		camera.setFPS(20);
 		
 		//cameraServer.startAutomaticCapture(0).setFPS(20);
+	}
+	
+	@Override
+	public void disabledPeriodic(){
+		super.disabledPeriodic();
+		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		leftDriveFront.setAllowableClosedLoopErr(32);
 		
+		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.setAllowableClosedLoopErr(32);
+		
+		drive.setRightSpeedScalar(1);
 	}
 }

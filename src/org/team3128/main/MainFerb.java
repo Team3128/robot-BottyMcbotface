@@ -4,6 +4,8 @@ import org.team3128.autonomous.AutoCrossBaseline;
 import org.team3128.autonomous.AutoPlaceFarGear;
 import org.team3128.autonomous.AutoPlaceMiddleGear;
 import org.team3128.autonomous.AutoShootFromHopper;
+import org.team3128.autonomous.AutoTestTurn;
+import org.team3128.autonomous.AutoTestTurn.TurnType;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -19,6 +21,7 @@ import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
+import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearRollerBackDoor;
 import org.team3128.mechanisms.PhoneCamera;
@@ -124,7 +127,7 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (4 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in, 380);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (3.85 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in, 380);
 		
 		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
@@ -182,6 +185,12 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(10), "StopCompressor");
 		lmRight.nameControl(new Button(11), "ScaleLights");
 		lmRight.nameControl(new Button(12), "ClearStickyFaults");
+		
+		lmRight.nameControl(new Button(8), "HalfSpeed");
+		lmRight.addButtonDownListener("HalfSpeed", () -> 
+		{
+			drive.arcadeDrive(.5, 0, 1, true);
+		});
 		
 		
 		lmRight.addMultiListener(() -> {
@@ -292,7 +301,7 @@ public class MainFerb extends NarwhalRobot
 		
 //		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
 //		programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
-//		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
+		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
 //		programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
 
 
@@ -307,6 +316,10 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Elevator Current", pdp.getCurrent(ELEVATOR_PDP_PORT));
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
+		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
+		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
+		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
+		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
 	}
 
 	@Override
