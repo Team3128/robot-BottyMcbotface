@@ -113,6 +113,16 @@ public class GearShovel {
 		return armPivotGearRatio * angle / Angle.ROTATIONS;
 	}
 	
+	public double getArmAngle()
+	{
+		return armPivot.getPosition() / 3.0;
+	}
+	
+	public void zeroArm()
+	{
+		armPivot.reset();
+	}
+	
 	/**
 	 * Determines whether or not the driver should be able to drive the robot around after depositing a gear.
 	 * 

@@ -66,7 +66,7 @@ public class MainFerb extends NarwhalRobot
 	public Joystick rightJoystick;
 	
 	// Robot
-	final static int ELEVATOR_PDP_PORT = 12;
+	final static int GEAR_ROLLER_PDP_PORT = 12;
 	public PowerDistributionPanel powerDistPanel;
 	
 	public Compressor compressor;
@@ -98,6 +98,7 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void constructHardware() 
 	{
+		// Drivetrain
 		leftDriveFront = new CANTalon(3);
 		leftDriveBack = new CANTalon(4);
 		rightDriveFront = new CANTalon(1);
@@ -116,22 +117,24 @@ public class MainFerb extends NarwhalRobot
 		gearshift.shiftToLow();
 		
 		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter, 1, 23.70*Length.in, 28.45*Length.in, 380);
-		
+		drive.setGearRatio(HIGH_GEAR_RATIO);
+
+		// Gear Shovel
 		armPivotMotor = new CANTalon(5);
 		gearShovel = new GearShovel(armPivotMotor, gearRoller, this);
 		
+		// General Electronics
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
-		
-		drive.setGearRatio(HIGH_GEAR_RATIO);
-		
-		rightJoystick = new Joystick(0);
-		lmRight = new ListenerManager(rightJoystick);
 		
 		gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
 		
 		powerDistPanel = new PowerDistributionPanel();
+		
+		// Listener Managers
+		rightJoystick = new Joystick(0);
+		lmRight = new ListenerManager(rightJoystick);
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
@@ -196,29 +199,20 @@ public class MainFerb extends NarwhalRobot
 		
 		lmRight.addButtonDownListener("GearShift", () -> {
 			gearshift.shiftToOtherGear();
-			
-			if(gearshift.isInHighGear())
-			{
-				drive.setGearRatio(HIGH_GEAR_RATIO);
-			}
-			else
-			{
-				drive.setGearRatio(LOW_GEAR_RATIO);
-			}
+			drive.setGearRatio(gearshift.isInHighGear() ? HIGH_GEAR_RATIO : LOW_GEAR_RATIO);
 		});
 		
 		lmRight.addButtonDownListener("StartCompressor", compressor::start);
 		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
 		
 		lmRight.addButtonDownListener("DepositGear", gearShovel::depositGear);
-		
-		//lmRight.addButtonDownListener("ToggleFlywheel", shooter::toggleFlywheel);
-		
+				
 		lmRight.addButtonDownListener("Climb", () -> 
 		{
 			//gearRollerBackDoor.activateDepositingMode();
 			climberMotor.setTarget(1);	
 		});
+		
 		lmRight.addButtonUpListener("Climb", ()->
 		{
 			//gearRollerBackDoor.deactivateDepositingMode();
@@ -264,7 +258,7 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void autonomousInit() {
-		
+		gearShovel.zeroArm();
 	}
 	
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
@@ -291,7 +285,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Gyro Angle", RobotMath.normalizeAngle(gyro.getAngle()));
 		SmartDashboard.putBoolean("Full Speed?", fullSpeed);
 		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High" : "Low");
-		SmartDashboard.putNumber("Elevator Current", powerDistPanel.getCurrent(ELEVATOR_PDP_PORT));
+		SmartDashboard.putNumber("Gear Roller Current", powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT));
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
 		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
@@ -299,6 +293,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
 		SmartDashboard.putBoolean("Running Gear Depositor?", gearShovel.depositingDone());
+		SmartDashboard.putNumber("Gear Angle", gearShovel.getArmAngle());
 	}
 
 	@Override
@@ -312,11 +307,11 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void teleopPeriodic()
 	{
-		if(powerDistPanel.getCurrent(ELEVATOR_PDP_PORT) > 100)
+		if(powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT) > 100)
 		{
-			Log.recoverable("MainFerb", "No smoking allowed!  The intake has stalled, so I'm turning it off!");
-			//shooter.disableFeeder();
-			//shooter.disableFlywheel();
+			Log.recoverable("MainFerb", "To much current in the gear roller.");
+			gearRoller.setTarget(0);
+
 		}
 	}
 	
