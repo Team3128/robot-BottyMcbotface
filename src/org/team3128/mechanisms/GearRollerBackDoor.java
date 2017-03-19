@@ -21,8 +21,7 @@ public class GearRollerBackDoor
 	DigitalInput digitalInput;
 	GearState state; // may be accessed from an interrupt, do not write directly
 
-	public GearRollerBackDoor(Piston doorPiston, Piston gearPiston,
-			MotorGroup gearRoller, DigitalInput digitalInput)
+	public GearRollerBackDoor(Piston doorPiston, Piston gearPiston, MotorGroup gearRoller, DigitalInput digitalInput)
 	{
 		this.doorPiston = doorPiston;
 		this.gearPiston = gearPiston;

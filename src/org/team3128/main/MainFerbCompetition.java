@@ -17,23 +17,25 @@ public class MainFerbCompetition extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		gearMotors = new MotorGroup(new VictorSP(2));
-		gearMotors.invert();
-		
-		floorIntakeMotor = new VictorSP(1);
 		climberMotor = new MotorGroup(new VictorSP(0));
 		climberMotor.invert();
-				
-		gearPiston = new Piston(2, 5);
-		doorPiston = new Piston(1, 6);
+
+		wheelDiameter = 3.85; //CHANGE FOR COMPETITION!!!!!!!!
 		
 		gearshiftPistons = new Piston(0, 7);
-		
-		gearInputSensor = new DigitalInput(5);
-		
-//		visionAimServo = new Servo(9);
-		
+
 		lightSignal = new DigitalOutput(0);
+		
+		gearRoller = new MotorGroup(new VictorSP(1));
+		
+		//gearMotors = new MotorGroup(new VictorSP(2));
+		//gearMotors.invert();
+				
+		//floorIntakeMotor = new VictorSP(1);
+		//gearPiston = new Piston(2, 5);
+		//doorPiston = new Piston(1, 6);
+		//gearInputSensor = new DigitalInput(5);
+		//visionAimServo = new Servo(9);
 		
 		super.constructHardware();
 		

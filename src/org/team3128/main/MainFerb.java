@@ -19,13 +19,10 @@ import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
-import org.team3128.mechanisms.GearRollerBackDoor;
-import org.team3128.mechanisms.PhoneCamera;
-import org.team3128.mechanisms.Shooter;
+import org.team3128.mechanisms.GearShovel;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -33,12 +30,9 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -49,71 +43,65 @@ public class MainFerb extends NarwhalRobot
 	
 	private boolean fullSpeed = false;
 	
-	public void toggleFullSpeed()
-	{
-		fullSpeed = !fullSpeed;
-	}
-	
-	public Shooter shooter;
-	public GearRollerBackDoor gearRollerBackDoor;
-
+	// Drivetrain
 	public SRXTankDrive drive;
-	public DigitalInput gearInputSensor;
-	
-	MotorGroup gearMotors;
 	
 	public CANTalon leftDriveFront, leftDriveBack;
 	public CANTalon rightDriveFront, rightDriveBack;
 	
-	public CANTalon shooterMotorRight, shooterMotorLeft;
-
-	public CANTalon elevatorMotor;	
-	public VictorSP floorIntakeMotor;
-		
-	public MotorGroup climberMotor;
-	
-	public ListenerManager lmRight;
-	//public ListenerManager lmLeft;
-	
-	public Joystick rightJoystick;
-	//public Joystick leftJoystick;
-	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPistons;
 	
-	public Piston doorPiston, gearPiston;
-
+	// Gear mechanism
+	public GearShovel gearShovel;
+	
+	public CANTalon armPivotMotor;
+	public MotorGroup gearRoller;
+	
+	// Climber
+	public MotorGroup climberMotor;
+	
+	// Controls
+	public ListenerManager lmRight;
+	public Joystick rightJoystick;
+	
+	// Robot
+	final static int ELEVATOR_PDP_PORT = 12;
 	public PowerDistributionPanel powerDistPanel;
+	
 	public Compressor compressor;
 	
 	public ADXRS450_Gyro gyro;
 	
-	public PhoneCamera phoneCamera;
-	// public Servo visionAimServo;
-	
-	public GenericSendableChooser<Alliance> allianceChooser;
-
-	final static int ELEVATOR_PDP_PORT = 12;
-	public PowerDistributionPanel pdp;
-	
 	public DigitalOutput lightSignal;
+	public double wheelDiameter;
 	public boolean scaleLights = false;
+	
+	
+	// Graveyard
+	
+	//public GearRollerBackDoor gearRollerBackDoor;
+	//public Piston doorPiston, gearPiston;
+	//public DigitalInput gearInputSensor;
+	//MotorGroup gearMotors;
+		
+	//public Shooter shooter;
+	//public CANTalon shooterMotorRight, shooterMotorLeft;
+	//public CANTalon elevatorMotor;	
+	//public VictorSP floorIntakeMotor;	
+	
+	//public PhoneCamera phoneCamera;
+	
+	//public GenericSendableChooser<Alliance> allianceChooser;
+
 	
 	@Override
 	protected void constructHardware() 
 	{
-		shooterMotorRight = new CANTalon(6);
-		shooterMotorLeft = new CANTalon(5);
-		
 		leftDriveFront = new CANTalon(3);
 		leftDriveBack = new CANTalon(4);
 		rightDriveFront = new CANTalon(1);
 		rightDriveBack = new CANTalon(2);
-		
-		elevatorMotor = new CANTalon(7);
-		elevatorMotor.changeControlMode(TalonControlMode.PercentVbus);
-		
-		gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
 				
 		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -127,13 +115,10 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, (3.85 * Math.PI)*Length.in, 1, 23.70*Length.in, 28.45*Length.in, 380);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter, 1, 23.70*Length.in, 28.45*Length.in, 380);
 		
-		shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		
-		shooterMotorLeft.changeControlMode(TalonControlMode.Follower);
-		shooterMotorLeft.set(shooterMotorRight.getDeviceID());
-		shooterMotorLeft.reverseOutput(false);
+		armPivotMotor = new CANTalon(5);
+		gearShovel = new GearShovel(armPivotMotor, gearRoller, this);
 		
 		powerDistPanel = new PowerDistributionPanel();
 		compressor = new Compressor();
@@ -146,22 +131,27 @@ public class MainFerb extends NarwhalRobot
 		gyro = new ADXRS450_Gyro();
 		gyro.calibrate();
 		
-		phoneCamera = new PhoneCamera(new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0));
-		
-		shooter = new Shooter(this, shooterMotorRight, elevatorMotor);
-		
-		//lmLeft = new ListenerManager(leftJoystick);
-		//addListenerManager(lmLeft);
-		
-		pdp = new PowerDistributionPanel();
-		
-		allianceChooser = new GenericSendableChooser<>();
-		allianceChooser.addDefault("Red", Alliance.Red);
-		allianceChooser.addObject("Blue", Alliance.Blue);
-        SmartDashboard.putData("allianceChooser", allianceChooser);
+		powerDistPanel = new PowerDistributionPanel();
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
+        
+        // Graveyard
+     	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
+     	//
+     	//shooterMotorRight = new CANTalon(6);
+     	//shooterMotorLeft = new CANTalon(5);
+     	//elevatorMotor = new CANTalon(7);
+     	//elevatorMotor.changeControlMode(TalonControlMode.PercentVbus);
+     	//
+     	//shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+     	//
+     	//shooterMotorLeft.changeControlMode(TalonControlMode.Follower);
+     	//shooterMotorLeft.set(shooterMotorRight.getDeviceID());
+     	//shooterMotorLeft.reverseOutput(false);
+     	//shooter = new Shooter(this, shooterMotorRight, elevatorMotor);
+     	//
+     	//phoneCamera = new PhoneCamera(new PIDConstants(.1, 0, 0), new PIDConstants(.1, 0, 0));
 	}
 
 	@Override
@@ -170,15 +160,11 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		
-		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "Launch");
+		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "DepositGear");
 				
-		lmRight.nameControl(new POV(0), "IntakePOV");
+		lmRight.nameControl(new POV(0), "GearMechanismPOV");
 		lmRight.nameControl(new Button(2), "GearShift");
-		lmRight.nameControl(new Button(3), "ToggleFlywheel");
 		lmRight.nameControl(new Button(4), "FullSpeed");
-		
-		lmRight.nameControl(new Button(5), "LoadGear");
-		lmRight.nameControl(new Button(6), "DepositGear");
 		
 		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
@@ -200,7 +186,6 @@ public class MainFerb extends NarwhalRobot
 					fullSpeed);
 			
 			//floorIntakeMotor.set(RobotMath.clamp(lmRight.getAxis("MoveForwards"), 0, 1));
-			
 			//Log.debug("MainFerb", String.format("MoveTurn: %f, MoveForwards: %f, Throttle: %f", lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle")));
 		
 		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
@@ -225,50 +210,44 @@ public class MainFerb extends NarwhalRobot
 		lmRight.addButtonDownListener("StartCompressor", compressor::start);
 		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
 		
-		lmRight.addButtonDownListener("Launch", shooter::enableFeeder);
-		lmRight.addButtonUpListener("Launch", shooter::disableFeeder);
+		lmRight.addButtonDownListener("DepositGear", gearShovel::depositGear);
 		
-		lmRight.addButtonDownListener("ToggleFlywheel", shooter::toggleFlywheel);
-		
-		lmRight.addButtonDownListener("LoadGear", gearRollerBackDoor::activateLoadingMode);
-		lmRight.addButtonUpListener("LoadGear", gearRollerBackDoor::deactivateLoadingMode);
-		
-		lmRight.addButtonDownListener("DepositGear", gearRollerBackDoor::activateDepositingMode);
-		lmRight.addButtonUpListener("DepositGear", gearRollerBackDoor::deactivateDepositingMode);
+		//lmRight.addButtonDownListener("ToggleFlywheel", shooter::toggleFlywheel);
 		
 		lmRight.addButtonDownListener("Climb", () -> 
 		{
-			gearRollerBackDoor.activateDepositingMode();
+			//gearRollerBackDoor.activateDepositingMode();
 			climberMotor.setTarget(1);	
 		});
 		lmRight.addButtonUpListener("Climb", ()->
 		{
-			gearRollerBackDoor.deactivateDepositingMode();
+			//gearRollerBackDoor.deactivateDepositingMode();
 			climberMotor.setTarget(0);
 		});
 		
 		lmRight.addButtonDownListener("ScaleLights", this::enableScaleLights);
 		lmRight.addButtonUpListener("ScaleLights", this::disableScaleLights);
-		lmRight.addListener("IntakePOV", (POVValue value) -> {
+		
+		lmRight.addListener("GearMechanismPOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
 			{
 			// Sides or Center
 			case 3:
 			case 7:
 			case 0:
-				floorIntakeMotor.set(0);
+				gearShovel.setVerticalMode();
 				break;
 			// Forwards
 			case 1:
 			case 2:
 			case 8:
-				floorIntakeMotor.set(1);
+				gearShovel.setFloorMode();
 				break;
 			// Backwards
 			case 4:
 			case 5:
 			case 6:
-				floorIntakeMotor.set(-1);
+				gearShovel.setLoadingMode();
 				break;
 			}
 		});
@@ -279,8 +258,8 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void teleopInit() {
-		shooter.disableFeeder();
-		shooter.disableFlywheel();
+		//shooter.disableFeeder();
+		//shooter.disableFlywheel();
 	}
 
 	@Override
@@ -299,10 +278,10 @@ public class MainFerb extends NarwhalRobot
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
 		programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 		
-//		programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
-//		programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
+		//programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
+		//programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
 		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
-//		programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
+		//programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
 
 
 	}
@@ -312,32 +291,32 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Gyro Angle", RobotMath.normalizeAngle(gyro.getAngle()));
 		SmartDashboard.putBoolean("Full Speed?", fullSpeed);
 		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High" : "Low");
-		SmartDashboard.putNumber("Shooter RPM", shooterMotorRight.getSpeed());
-		SmartDashboard.putNumber("Elevator Current", pdp.getCurrent(ELEVATOR_PDP_PORT));
+		SmartDashboard.putNumber("Elevator Current", powerDistPanel.getCurrent(ELEVATOR_PDP_PORT));
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
 		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
 		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
 		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
+		SmartDashboard.putBoolean("Running Gear Depositor?", gearShovel.depositingDone());
 	}
 
 	@Override
 	protected void disabledInit()
 	{
 		drive.stopMovement();
-		shooter.disableFeeder();
-		shooter.disableFlywheel();
+		//shooter.disableFeeder();
+		//shooter.disableFlywheel();
 	}
 	
 	@Override
 	protected void teleopPeriodic()
 	{
-		if(pdp.getCurrent(ELEVATOR_PDP_PORT) > 100)
+		if(powerDistPanel.getCurrent(ELEVATOR_PDP_PORT) > 100)
 		{
 			Log.recoverable("MainFerb", "No smoking allowed!  The intake has stalled, so I'm turning it off!");
-			shooter.disableFeeder();
-			shooter.disableFlywheel();
+			//shooter.disableFeeder();
+			//shooter.disableFlywheel();
 		}
 	}
 	
@@ -349,5 +328,10 @@ public class MainFerb extends NarwhalRobot
 	public void disableScaleLights()
 	{
 		lightSignal.set(false);
+	}
+	
+	public void toggleFullSpeed()
+	{
+		fullSpeed = !fullSpeed;
 	}
 }
