@@ -10,10 +10,7 @@ public class AutoPlaceMiddleGear extends CommandGroup
 	
 	public AutoPlaceMiddleGear(MainFerb robot){
 		addSequential(robot.drive.new CmdMoveForward(-79 * Length.in, 3500, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
-		
-		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 3000, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
+		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 		
 //		addSequential(robot.drive.new CmdArcTurn(110, 3000, Direction.RIGHT));
 //		addSequential(robot.drive.new CmdMoveForward(1.5 * Length.m, 2000, 0.5));

@@ -22,8 +22,6 @@ public class AutoPlaceFarGear extends CommandGroup
 		addSequential(robot.drive.new CmdMoveForward(segment_one + segment_one_inch_offset, 4000, 0.5));
 		addSequential(robot.drive.new CmdArcTurn(60, 1500, side));
 		addSequential(robot.drive.new CmdMoveForward(segment_two + segment_two_inch_offset, 3000, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
-		addSequential(robot.drive.new CmdMoveForward(-24 * Length.in, 6000, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
+		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 	}
 }

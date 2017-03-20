@@ -16,8 +16,6 @@ public class AutoPlaceGearFromKey extends CommandGroup
 		addSequential(robot.drive.new CmdArcTurn(44, 1500,
 				alliance == Alliance.Blue ? Direction.RIGHT : Direction.LEFT));
 		addSequential(robot.drive.new CmdMoveForward(-59 * Length.in, 3000, 0.50));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
-		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 6000, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
+		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 	}
 }

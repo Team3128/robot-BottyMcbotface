@@ -6,6 +6,7 @@ import org.team3128.common.util.units.Length;
 import org.team3128.main.MainFerb;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.command.Command;
@@ -26,15 +27,36 @@ public class GearShovel {
 	 */
 	public enum ShovelState
 	{
-		LOADING,
-		VERTICAL,
-		FLOOR;
+		LOADING(0, 1.0),
+		VERTICAL(55.0, 0.0),
+		DEPOSITING(80.0, 0.0),
+		FLOOR(145.0, 1.0);
+		
+		double angle;
+		double power;
+		
+		private ShovelState(double angle, double power)
+		{
+			this.angle = angle;
+			this.power = power;
+		}
+		
+		public double getAngle()
+		{
+			return angle;
+		}
+		
+		public double getPower()
+		{
+			return power;
+		}
 	}
 	
 	CANTalon armPivot;
-	MotorGroup roller;
+	public MotorGroup roller;
 	ShovelState state;
 	CmdDepositGear depositGearCommand;
+	MainFerb robot;
 	
 	private double armPivotGearRatio = 3.0;
 	
@@ -48,9 +70,11 @@ public class GearShovel {
 	{
 		this.armPivot = armPivot;
 		armPivot.changeControlMode(TalonControlMode.Position);
-
+		armPivot.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		
 		this.roller = roller;
 		
+		this.robot = robot;
 		depositGearCommand = new CmdDepositGear(robot);
 		
 		setState(ShovelState.VERTICAL);
@@ -65,21 +89,8 @@ public class GearShovel {
 	{
 		this.state = state;
 		
-		if (state == ShovelState.LOADING)
-		{
-			armPivot.set(armPivotAppropriatePosition(0.0));
-			roller.setTarget(0.5);
-		}
-		else if (state == ShovelState.VERTICAL)
-		{
-			armPivot.set(armPivotAppropriatePosition(40.0));
-			roller.setTarget(0);
-		}
-		else if (state == ShovelState.FLOOR)
-		{
-			armPivot.set(armPivotAppropriatePosition(130.0));
-			roller.setTarget(0.5);
-		}
+		armPivot.set(armPivotAppropriatePosition(state.getAngle()));
+		roller.setTarget(state.getPower());
 	}
 	
 	public void setLoadingMode()
@@ -97,9 +108,9 @@ public class GearShovel {
 		setState(ShovelState.VERTICAL);
 	}
 	
-	public void depositGear()
+	public void setDepositingMode()
 	{
-		depositGearCommand.start();
+		setState(ShovelState.DEPOSITING);
 	}
 	
 	/**
@@ -115,12 +126,12 @@ public class GearShovel {
 	
 	public double getArmAngle()
 	{
-		return armPivot.getPosition() / 3.0;
+		return armPivot.getPosition() * Angle.ROTATIONS / 3.0;
 	}
 	
 	public void zeroArm()
 	{
-		armPivot.reset();
+		armPivot.setPosition(0);
 	}
 	
 	/**
@@ -133,6 +144,11 @@ public class GearShovel {
 		return !depositGearCommand.isRunning();
 	}
 	
+	public ShovelState getState()
+	{
+		return state;
+	}
+	
 	/**
 	 * Command that tells the shovel to lower and eject the gear or reel itself back in.
 	 * 
@@ -141,16 +157,23 @@ public class GearShovel {
 	public class CmdSetDepositingMode extends Command
 	{
 		boolean depositing = false;
+		
 		public CmdSetDepositingMode(boolean depositing)
 		{
-			super(1);
+			super(2);
 			this.depositing = depositing;
 		}
 		
 		@Override
 		protected void initialize() {
-			roller.setTarget((depositing) ? -0.5 : 0.0);
-			armPivot.set(armPivotAppropriatePosition((depositing) ? 70.0 : 40.0));
+			if (depositing)
+			{
+				setState(ShovelState.DEPOSITING);
+			}
+			else
+			{
+				setState(ShovelState.VERTICAL);
+			}
 		}
 		
 		@Override
@@ -159,7 +182,7 @@ public class GearShovel {
 		
 		@Override
 		protected boolean isFinished() {
-			return isTimedOut();
+			return isTimedOut() || (getArmAngle() > state.getAngle() - 3.0 && getArmAngle() < state.getAngle() + 3.0);
 		}
 	}
 	
@@ -174,7 +197,7 @@ public class GearShovel {
 		public CmdDepositGear(MainFerb robot)
 		{
 			addParallel(new CmdSetDepositingMode(true));
-			addParallel(robot.drive.new CmdMoveForward(-2 * Length.ft, 2000, 0.5));
+			addParallel(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.5));
 			
 			addSequential(new CmdSetDepositingMode(false));
 		}

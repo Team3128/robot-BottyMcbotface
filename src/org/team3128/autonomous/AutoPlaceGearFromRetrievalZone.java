@@ -17,8 +17,6 @@ public class AutoPlaceGearFromRetrievalZone extends CommandGroup
 		// turn left if we are on the blue side, right otherwise
 		addSequential(robot.drive.new CmdArcTurn(40, 1750, alliance == Alliance.Blue ? Direction.LEFT : Direction.RIGHT));
 		addSequential(robot.drive.new CmdMoveForward(-28 * Length.in, 3000, 0.50));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(true));
-		addSequential(robot.drive.new CmdMoveForward(24 * Length.in, 6000, 0.5));
-		addSequential(robot.gearRollerBackDoor.new CmdSetDepositingMode(false));
+		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 	}
 }
