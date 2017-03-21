@@ -1,6 +1,5 @@
 package org.team3128.mechanisms;
 
-import org.team3128.autonomous.commands.CmdAimToHighGoal;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.main.MainFerb;
@@ -73,7 +72,7 @@ public class Shooter
 		thread = new Thread(this::shooterThread);
 		thread.start();
 		
-		cmdAim = new CmdAimToHighGoal(robot, 6000);
+		//cmdAim = new CmdAimToHighGoal(robot, 6000);
 	}
 
 	/**

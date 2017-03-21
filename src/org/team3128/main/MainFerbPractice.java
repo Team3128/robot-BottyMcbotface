@@ -60,6 +60,11 @@ public class MainFerbPractice extends MainFerb {
 		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
 		rightDriveFront.setAllowableClosedLoopErr(32);
 		
+		armPivotMotor.configNominalOutputVoltage(.75, -.75);
+		rightDriveFront.setAllowableClosedLoopErr(48);
+		
+		armPivotMotor.setNominalClosedLoopVoltage(12);
+
 		drive.setRightSpeedScalar(1);
 	}
 }

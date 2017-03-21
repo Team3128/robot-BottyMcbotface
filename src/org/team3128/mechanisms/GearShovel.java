@@ -1,6 +1,7 @@
 package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
+import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.main.MainFerb;
@@ -29,16 +30,16 @@ public class GearShovel {
 	{
 		LOADING(0, 1.0),
 		VERTICAL(55.0, 0.0),
-		DEPOSITING(80.0, 0.0),
+		DEPOSITING(80.0, -1),
 		FLOOR(145.0, 1.0);
 		
 		double angle;
-		double power;
+		double rollerPower;
 		
 		private ShovelState(double angle, double power)
 		{
 			this.angle = angle;
-			this.power = power;
+			this.rollerPower = power;
 		}
 		
 		public double getAngle()
@@ -48,7 +49,7 @@ public class GearShovel {
 		
 		public double getPower()
 		{
-			return power;
+			return rollerPower;
 		}
 	}
 	
@@ -91,6 +92,8 @@ public class GearShovel {
 		
 		armPivot.set(armPivotAppropriatePosition(state.getAngle()));
 		roller.setTarget(state.getPower());
+		
+		Log.debug("GearShovel", "Pivot angle: " + state.getAngle() + ", roller power:" + state.getPower());
 	}
 	
 	public void setLoadingMode()
@@ -177,7 +180,12 @@ public class GearShovel {
 		}
 		
 		@Override
-		protected void end() {
+		protected void end() 
+		{
+			//if(depositing)
+			//{
+			//	roller.setTarget(-1);
+			//}
 		}
 		
 		@Override
@@ -196,9 +204,8 @@ public class GearShovel {
 	{
 		public CmdDepositGear(MainFerb robot)
 		{
-			addParallel(new CmdSetDepositingMode(true));
-			addParallel(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.5));
-			
+			addSequential(new CmdSetDepositingMode(true));
+			addSequential(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.3));
 			addSequential(new CmdSetDepositingMode(false));
 		}
 	}

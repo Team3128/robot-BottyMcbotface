@@ -22,7 +22,6 @@ import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearShovel;
-import org.team3128.mechanisms.GearShovel.ShovelState;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -147,6 +146,8 @@ public class MainFerb extends NarwhalRobot
         // SmartDashboard
         LAST_BLINK_TIME = System.currentTimeMillis();
         
+        gearShovel.zeroArm();
+        
         // Graveyard
      	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
      	//
@@ -167,7 +168,7 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void setupListeners() {
-		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
+		lmRight.nameControl(ControllerExtreme3D.JOYX, "MoveTurn");
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		
@@ -267,7 +268,6 @@ public class MainFerb extends NarwhalRobot
 	
 	@Override
 	protected void autonomousInit() {
-		gearShovel.zeroArm();
 	}
 	
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
@@ -305,6 +305,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
 		SmartDashboard.putString("Allowed To Drive?", (currentBlinkState && !gearShovel.depositingDone()) ? "DO NOT DRIVE" : "");
 		SmartDashboard.putNumber("Gear Angle", gearShovel.getArmAngle());
+		SmartDashboard.putString("Shovel State", gearShovel.getState().name());
 	}
 
 	@Override
@@ -318,21 +319,24 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void teleopPeriodic()
 	{
-		if(powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT) > 100)
-		{
-			Log.recoverable("MainFerb", "To much current in the gear roller.");
-			gearRoller.setTarget(0);
-
-		}
+		//if(powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT) > 100)
+		//{
+		//	Log.recoverable("MainFerb", "To much current in the gear roller.");
+		//	gearRoller.setTarget(0);
+		//}
 		
-		if (gearShovel.getState() == ShovelState.DEPOSITING && leftDriveFront.getSpeed() < 0)
-		{
-			gearShovel.roller.setTarget(-0.5);
-		}
-		else if (gearShovel.getState() == ShovelState.DEPOSITING && (leftDriveFront.getSpeed() == 0 || leftDriveFront.getSpeed() > 0))
-		{
-			gearShovel.roller.setTarget(0);
-		}
+//		if (gearShovel.getState() == ShovelState.DEPOSITING)
+//		{
+//			if((leftDriveFront.getSpeed() < -5 || leftDriveFront.getSpeed() < -5))
+//			{
+//				Log.debug("MainFerb", "Robot is going backwards, running gear roller");
+//				gearShovel.roller.setTarget(-1);
+//			}
+//			else
+//			{
+//				gearShovel.roller.setTarget(0);
+//			}
+//		}
 	}
 	
 	public void enableScaleLights()
