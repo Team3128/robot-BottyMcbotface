@@ -63,7 +63,10 @@ public class MainFerb extends NarwhalRobot
 	
 	// Controls
 	public ListenerManager lmRight;
+	public ListenerManager lmLeft;
+	
 	public Joystick rightJoystick;
+	public Joystick leftJoystick;
 	
 	// Robot
 	final static int GEAR_ROLLER_PDP_PORT = 12;
@@ -146,6 +149,9 @@ public class MainFerb extends NarwhalRobot
 		rightJoystick = new Joystick(0);
 		lmRight = new ListenerManager(rightJoystick);
 		
+		leftJoystick = new Joystick(1);
+		lmLeft = new ListenerManager(leftJoystick);
+		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
         
@@ -177,25 +183,10 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void setupListeners() {
+		// Drive
 		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-
-		
-		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "DepositGear");
-				
-		lmRight.nameControl(new POV(0), "GearMechanismPOV");
-		lmRight.nameControl(new Button(2), "GearShift");
-		lmRight.nameControl(new Button(4), "FullSpeed");
-		lmRight.nameControl(new Button(5), "BallCleanup");
-		
-		lmRight.nameControl(new Button(7), "Climb");
-		lmRight.nameControl(new Button(9), "StartCompressor");
-		lmRight.nameControl(new Button(10), "StopCompressor");
-		lmRight.nameControl(new Button(11), "ZeroArm");
-		lmRight.nameControl(new Button(12), "ClearStickyFaults");
-		
-		
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(/*.5 * */lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
@@ -206,54 +197,22 @@ public class MainFerb extends NarwhalRobot
 			//Log.debug("MainFerb", String.format("MoveTurn: %f, MoveForwards: %f, Throttle: %f", lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle")));
 		
 		}, "MoveTurn", "MoveForwards", "Throttle", "FullSpeed");
-		
-		lmRight.addButtonDownListener("FullSpeed", this::toggleFullSpeed);
-		
-		lmRight.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
-		
+
+		lmRight.nameControl(new Button(2), "GearShift");
 		lmRight.addButtonDownListener("GearShift", () -> {
 			gearshift.shiftToOtherGear();
 			drive.setGearRatio(gearshift.isInHighGear() ? HIGH_GEAR_RATIO : LOW_GEAR_RATIO);
 		});
 		
-		lmRight.addButtonDownListener("StartCompressor", compressor::start);
-		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
-		
+		lmRight.nameControl(new Button(4), "FullSpeed");
+		lmRight.addButtonDownListener("FullSpeed", this::toggleFullSpeed);
+				
+		// Gear Shovel
+		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "DepositGear");
 		lmRight.addButtonDownListener("DepositGear", gearShovel::setDepositingMode);
 		lmRight.addButtonUpListener("DepositGear", gearShovel::setVerticalMode);
-				
-		lmRight.addButtonDownListener("Climb", () -> 
-		{
-			//gearRollerBackDoor.activateDepositingMode();
-			climberMotor.setTarget(1);	
-		});
 		
-		lmRight.addButtonUpListener("Climb", ()->
-		{
-			//gearRollerBackDoor.deactivateDepositingMode();
-			climberMotor.setTarget(0);
-		});
-		
-		//lmRight.addButtonDownListener("ScaleLights", this::enableScaleLights);
-		//lmRight.addButtonUpListener("ScaleLights", this::disableScaleLights);
-		
-		lmRight.addButtonDownListener("ZeroArm", () -> 
-		{
-			armPivotMotor.changeControlMode(TalonControlMode.PercentVbus);
-			armPivotMotor.set(-.25);
-		});
-		
-		lmRight.addButtonUpListener("ZeroArm", () -> 
-		{
-			armPivotMotor.changeControlMode(TalonControlMode.Position);
-			gearShovel.zeroArm();
-		});
-		
-		lmRight.addButtonDownListener("BallCleanup", () ->
-		{
-			gearShovel.setCleaningMode();
-		});
-		
+		lmRight.nameControl(new POV(0), "GearShovelPOV");
 		lmRight.addListener("GearMechanismPOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
 			{
@@ -278,8 +237,70 @@ public class MainFerb extends NarwhalRobot
 			}
 		});
 		
+		lmRight.nameControl(new Button(11), "ZeroShovelPivotArm");
+		lmRight.addButtonDownListener("ZeroShovelPivotArm", () -> 
+		{
+			armPivotMotor.changeControlMode(TalonControlMode.PercentVbus);
+			armPivotMotor.set(-.25);
+		});
+		lmRight.addButtonUpListener("ZeroShovelPivotArm", () -> 
+		{
+			armPivotMotor.changeControlMode(TalonControlMode.Position);
+			gearShovel.zeroArm();
+		});
+		
+		lmRight.nameControl(new Button(5), "BallCleanup");
+		lmRight.addButtonDownListener("BallCleanup", () ->
+		{
+			gearShovel.setCleaningMode();
+		});
+		
+		// Climber
+		lmRight.nameControl(new Button(7), "Climb");
+		lmRight.addButtonDownListener("Climb", () -> 
+		{
+			climberMotor.setTarget(1);	
+		});
+		lmRight.addButtonUpListener("Climb", ()->
+		{
+			climberMotor.setTarget(0);
+		});
+		
+		// General Robot
+		lmRight.nameControl(new Button(9), "StartCompressor");
+		lmRight.addButtonDownListener("StartCompressor", compressor::start);
+		
+		lmRight.nameControl(new Button(10), "StopCompressor");
+		lmRight.addButtonDownListener("StopCompressor", compressor::stop);
+		
+		lmRight.nameControl(new Button(12), "ClearStickyFaults");
+		lmRight.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
+		
 		addListenerManager(lmRight);
-
+		
+		lmLeft.nameControl(ControllerExtreme3D.JOYY, "LeftGearShovelControl");
+		lmLeft.addListener("LeftGearShovelControl", (double joyY) ->
+		{
+			if (joyY > 0.3)
+			{
+				gearShovel.setFloorMode();
+			}
+			else if (joyY < -0.3)
+			{
+				gearShovel.setLoadingMode();
+			}
+			else
+			{
+				gearShovel.setVerticalMode();
+			}
+		});
+		
+		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "LeftGearDeposit");
+		lmLeft.addButtonDownListener("LeftGearDeposit", gearShovel::setDepositingMode);
+		lmLeft.addButtonUpListener("LeftGearDeposit", gearShovel::setVerticalMode);
+		
+		lmLeft.nameControl(new Button(5), "LeftBallCleanup");
+		lmLeft.addButtonDownListener("LeftBallCleanup", gearShovel::setFloorMode);
 	}
 
 	@Override
