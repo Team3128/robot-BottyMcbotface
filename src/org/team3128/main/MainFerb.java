@@ -30,6 +30,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -81,6 +82,10 @@ public class MainFerb extends NarwhalRobot
 	boolean currentBlinkState = false;
 	int BLINK_TIME_MILLISECONDS = 1000;
 	
+	int time_remaining = 150;
+	boolean timer_running = false;
+	long last_tick_time;
+	
 	
 	// Graveyard
 	
@@ -96,7 +101,7 @@ public class MainFerb extends NarwhalRobot
 	
 	//public PhoneCamera phoneCamera;
 	
-	//public GenericSendableChooser<Alliance> allianceChooser;
+	public GenericSendableChooser<Alliance> allianceChooser;
 
 	
 	@Override
@@ -120,12 +125,13 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter, 1, 23.70*Length.in, 28.45*Length.in, 380);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 380);
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 
 		// Gear Shovel
-		armPivotMotor = new CANTalon(5);
+		armPivotMotor = new CANTalon(7);
 		gearShovel = new GearShovel(armPivotMotor, gearRoller, this);
+        gearShovel.zeroArm();
 		
 		// General Electronics
 		powerDistPanel = new PowerDistributionPanel();
@@ -145,8 +151,11 @@ public class MainFerb extends NarwhalRobot
         
         // SmartDashboard
         LAST_BLINK_TIME = System.currentTimeMillis();
-        
-        gearShovel.zeroArm();
+        allianceChooser = new GenericSendableChooser<Alliance>();
+        allianceChooser.addDefault("BLUE", Alliance.Blue);
+        allianceChooser.addObject("RED", Alliance.Red);
+		SmartDashboard.putData("Alliance:", allianceChooser);
+
         
         // Graveyard
      	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
@@ -168,27 +177,23 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void setupListeners() {
-		lmRight.nameControl(ControllerExtreme3D.JOYX, "MoveTurn");
+		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
 		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
+
 		
 		lmRight.nameControl(ControllerExtreme3D.TRIGGER, "DepositGear");
 				
 		lmRight.nameControl(new POV(0), "GearMechanismPOV");
 		lmRight.nameControl(new Button(2), "GearShift");
 		lmRight.nameControl(new Button(4), "FullSpeed");
+		lmRight.nameControl(new Button(5), "BallCleanup");
 		
 		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.nameControl(new Button(9), "StartCompressor");
 		lmRight.nameControl(new Button(10), "StopCompressor");
-		lmRight.nameControl(new Button(11), "ScaleLights");
+		lmRight.nameControl(new Button(11), "ZeroArm");
 		lmRight.nameControl(new Button(12), "ClearStickyFaults");
-		
-		lmRight.nameControl(new Button(8), "HalfSpeed");
-		lmRight.addButtonDownListener("HalfSpeed", () -> 
-		{
-			drive.arcadeDrive(.5, 0, 1, true);
-		});
 		
 		
 		lmRight.addMultiListener(() -> {
@@ -229,8 +234,25 @@ public class MainFerb extends NarwhalRobot
 			climberMotor.setTarget(0);
 		});
 		
-		lmRight.addButtonDownListener("ScaleLights", this::enableScaleLights);
-		lmRight.addButtonUpListener("ScaleLights", this::disableScaleLights);
+		//lmRight.addButtonDownListener("ScaleLights", this::enableScaleLights);
+		//lmRight.addButtonUpListener("ScaleLights", this::disableScaleLights);
+		
+		lmRight.addButtonDownListener("ZeroArm", () -> 
+		{
+			armPivotMotor.changeControlMode(TalonControlMode.PercentVbus);
+			armPivotMotor.set(-.25);
+		});
+		
+		lmRight.addButtonUpListener("ZeroArm", () -> 
+		{
+			armPivotMotor.changeControlMode(TalonControlMode.Position);
+			gearShovel.zeroArm();
+		});
+		
+		lmRight.addButtonDownListener("BallCleanup", () ->
+		{
+			gearShovel.setCleaningMode();
+		});
 		
 		lmRight.addListener("GearMechanismPOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
@@ -262,12 +284,14 @@ public class MainFerb extends NarwhalRobot
 
 	@Override
 	protected void teleopInit() {
-		//shooter.disableFeeder();
-		//shooter.disableFlywheel();
+		fullSpeed = true;
 	}
 	
 	@Override
 	protected void autonomousInit() {
+		fullSpeed = false;
+		gearShovel.setVerticalMode();
+		resetTimer();
 	}
 	
 	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
@@ -276,8 +300,8 @@ public class MainFerb extends NarwhalRobot
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
 		//programChooser.addObject("Place Gear From Retrieval Zone", new AutoPlaceGearFromRetrievalZone(this, currAlliance));
 		//programChooser.addObject("Place Gear From Key", new AutoPlaceGearFromKey(this, currAlliance));
-		programChooser.addObject("Turn Right Far Gear", new AutoPlaceFarGear(this, Direction.RIGHT));
-		programChooser.addObject("Turn Left Far Gear", new AutoPlaceFarGear(this, Direction.LEFT));
+		programChooser.addObject("Turn Right Far Gear", new AutoPlaceFarGear(this, Direction.RIGHT, allianceChooser.getSelected()));
+		programChooser.addObject("Turn Left Far Gear", new AutoPlaceFarGear(this, Direction.LEFT, allianceChooser.getSelected()));
 		programChooser.addObject("Place Middle Gear", new AutoPlaceMiddleGear(this));
 		//programChooser.addObject("Trigger Hopper & Shoot", new AutoShootFromHopper(this));
 		
@@ -292,10 +316,12 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void updateDashboard() {
 		blinkUpdate();
+		tick();
 		
+		SmartDashboard.putString("Time Remaining: ", time_remaining + " sec");
 		SmartDashboard.putNumber("Gyro Angle", RobotMath.normalizeAngle(gyro.getAngle()));
-		SmartDashboard.putString("Full Speed?", (currentBlinkState && fullSpeed) ? "NOT FULL SPEED" : "");
-		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High" : "Low");
+		SmartDashboard.putString("Full Speed?", (currentBlinkState && !fullSpeed) ? "NOT FULL SPEED" : "");
+		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High Gear" : "Low Gear");
 		SmartDashboard.putNumber("Gear Roller Current", powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT));
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
@@ -303,7 +329,6 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
 		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
-		SmartDashboard.putString("Allowed To Drive?", (currentBlinkState && !gearShovel.depositingDone()) ? "DO NOT DRIVE" : "");
 		SmartDashboard.putNumber("Gear Angle", gearShovel.getArmAngle());
 		SmartDashboard.putString("Shovel State", gearShovel.getState().name());
 	}
@@ -312,6 +337,7 @@ public class MainFerb extends NarwhalRobot
 	protected void disabledInit()
 	{
 		drive.stopMovement();
+		disableTimer();
 		//shooter.disableFeeder();
 		//shooter.disableFlywheel();
 	}
@@ -359,6 +385,27 @@ public class MainFerb extends NarwhalRobot
 		if (System.currentTimeMillis() - LAST_BLINK_TIME > BLINK_TIME_MILLISECONDS)
 		{
 			currentBlinkState = !currentBlinkState;
+		}
+	}
+	
+	public void disableTimer()
+	{
+		timer_running = false;
+	}
+	
+	public void resetTimer()
+	{
+		time_remaining = 150;
+		last_tick_time = System.currentTimeMillis();
+		timer_running = true;
+	}
+	
+	public void tick()
+	{
+		if (System.currentTimeMillis() - last_tick_time >= 1000 && time_remaining >= 0 && timer_running)
+		{
+			time_remaining -= 1;
+			last_tick_time = System.currentTimeMillis();
 		}
 	}
 }

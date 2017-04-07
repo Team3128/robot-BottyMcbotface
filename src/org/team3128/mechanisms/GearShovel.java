@@ -2,8 +2,8 @@ package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Log;
+import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.units.Angle;
-import org.team3128.common.util.units.Length;
 import org.team3128.main.MainFerb;
 
 import com.ctre.CANTalon;
@@ -29,12 +29,13 @@ public class GearShovel {
 	public enum ShovelState
 	{
 		LOADING(0, 1.0),
-		VERTICAL(55.0, 0.0),
-		DEPOSITING(80.0, -1),
-		FLOOR(145.0, 1.0);
+		VERTICAL(65.0, 0.0),
+		DEPOSITING(87.0, 0),
+		CLEAN(145.0, 0),
+		FLOOR(154.0, 1.0);
 		
-		double angle;
-		double rollerPower;
+		private double angle;
+		private double rollerPower;
 		
 		private ShovelState(double angle, double power)
 		{
@@ -58,6 +59,8 @@ public class GearShovel {
 	ShovelState state;
 	CmdDepositGear depositGearCommand;
 	MainFerb robot;
+	Thread depositingRollerThread;
+	boolean auto_override = false;
 	
 	private double armPivotGearRatio = 3.0;
 	
@@ -79,6 +82,34 @@ public class GearShovel {
 		depositGearCommand = new CmdDepositGear(robot);
 		
 		setState(ShovelState.VERTICAL);
+		
+		depositingRollerThread = new Thread(() ->
+		{
+			while(true)
+			{
+				if(state == ShovelState.DEPOSITING)
+				{
+					if(RobotMath.abs(getArmAngle() - ShovelState.DEPOSITING.angle) < 10 * Angle.DEGREES || auto_override)
+					{
+						roller.setTarget(-1);
+					}
+					else
+					{
+						roller.setTarget(0);
+					}
+				}
+				try
+				{
+					Thread.sleep(100);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		depositingRollerThread.start();
 	}
 	
 	/**
@@ -89,6 +120,8 @@ public class GearShovel {
 	private void setState(ShovelState state)
 	{
 		this.state = state;
+		
+		auto_override = false;
 		
 		armPivot.set(armPivotAppropriatePosition(state.getAngle()));
 		roller.setTarget(state.getPower());
@@ -116,6 +149,11 @@ public class GearShovel {
 		setState(ShovelState.DEPOSITING);
 	}
 	
+	public void setCleaningMode()
+	{
+		setState(ShovelState.CLEAN);
+	}
+	
 	/**
 	 * Converts an angle to the appropriate input for the geared up pivot motor.
 	 * 
@@ -137,16 +175,6 @@ public class GearShovel {
 		armPivot.setPosition(0);
 	}
 	
-	/**
-	 * Determines whether or not the driver should be able to drive the robot around after depositing a gear.
-	 * 
-	 * @return - If the drive backwards has completed.
-	 */
-	public boolean depositingDone()
-	{
-		return !depositGearCommand.isRunning();
-	}
-	
 	public ShovelState getState()
 	{
 		return state;
@@ -163,7 +191,7 @@ public class GearShovel {
 		
 		public CmdSetDepositingMode(boolean depositing)
 		{
-			super(2);
+			super(1);
 			this.depositing = depositing;
 		}
 		
@@ -182,10 +210,10 @@ public class GearShovel {
 		@Override
 		protected void end() 
 		{
-			//if(depositing)
-			//{
-			//	roller.setTarget(-1);
-			//}
+			if(depositing && roller.getTarget() == 0)
+			{
+				overrideOffload(true);
+			}
 		}
 		
 		@Override
@@ -205,8 +233,12 @@ public class GearShovel {
 		public CmdDepositGear(MainFerb robot)
 		{
 			addSequential(new CmdSetDepositingMode(true));
-			addSequential(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.3));
-			addSequential(new CmdSetDepositingMode(false));
+//			addSequential(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.3));
+//			addSequential(new CmdSetDepositingMode(false));
 		}
+	}
+	
+	public void overrideOffload(boolean override) {
+		auto_override = override;
 	}
 }

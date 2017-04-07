@@ -2,9 +2,10 @@ package org.team3128.main;
 
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
+import org.team3128.common.util.units.Length;
 
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -20,13 +21,13 @@ public class MainFerbCompetition extends MainFerb {
 		climberMotor = new MotorGroup(new VictorSP(0));
 		climberMotor.invert();
 
-		wheelDiameter = 3.85; //CHANGE FOR COMPETITION!!!!!!!!
+		wheelDiameter = 4.2 * Length.in;
 		
 		gearshiftPistons = new Piston(0, 7);
 
 		lightSignal = new DigitalOutput(0);
 		
-		gearRoller = new MotorGroup(new VictorSP(1));
+		gearRoller = new MotorGroup(new VictorSP(2));
 		
 		//gearMotors = new MotorGroup(new VictorSP(2));
 		//gearMotors.invert();
@@ -47,19 +48,25 @@ public class MainFerbCompetition extends MainFerb {
 		
 		CameraServer cameraServer = CameraServer.getInstance();
 		
-		cameraServer.startAutomaticCapture(0).setFPS(20);
+		UsbCamera camera = cameraServer.startAutomaticCapture(0);
+		camera.setFPS(10);
+		camera.setResolution(480, 320);
 	}
 	
 	@Override
 	protected void disabledPeriodic()
 	{
 		super.disabledPeriodic();
-		leftDriveFront.configPeakOutputVoltage(10 , -10);
-		leftDriveFront.configNominalOutputVoltage(2, -2);
+		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
 		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configPeakOutputVoltage(9.5, -9.5);
-		rightDriveFront.configNominalOutputVoltage(2, -2);
-		rightDriveFront.setAllowableClosedLoopErr(64);
+		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
+		rightDriveFront.setAllowableClosedLoopErr(32);
+		
+		armPivotMotor.configNominalOutputVoltage(.75, -.75);
+		armPivotMotor.setNominalClosedLoopVoltage(12);
+		
+		drive.setRightSpeedScalar(1.0);
+		drive.setLeftSpeedScalar(1.0);
 	}
 }
