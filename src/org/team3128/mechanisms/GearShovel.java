@@ -1,6 +1,7 @@
 package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
+import org.team3128.common.util.Assert;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.units.Angle;
@@ -31,7 +32,7 @@ public class GearShovel {
 		LOADING(0, 1.0),
 		VERTICAL(65.0, 0.0),
 		DEPOSITING(87.0, 0),
-		CLEAN(145.0, 0),
+		CLEAN(130.0, 0),
 		FLOOR(154.0, 1.0);
 		
 		private double angle;
@@ -56,13 +57,18 @@ public class GearShovel {
 	
 	CANTalon armPivot;
 	public MotorGroup roller;
-	ShovelState state;
+	ShovelState state; // last set state of the shovel.  NOT CORRECT in unlocked mode.
 	CmdDepositGear depositGearCommand;
 	MainFerb robot;
 	Thread depositingRollerThread;
-	boolean auto_override = false;
 	
 	private double armPivotGearRatio = 3.0;
+	
+	/**
+	 * if true, the intake is in competition-legal mode and can only be set to specific positions.  If false, state is not tracked and the
+	 * intake can be set to any position using the setAngle() method
+	 */
+	private boolean locked;
 	
 	/**
 	 * Control system for the gear mechanism V.2 - now with floor scooping!
@@ -70,14 +76,14 @@ public class GearShovel {
 	 * @param armPivot
 	 * @param roller
 	 */
-	public GearShovel(CANTalon armPivot, MotorGroup roller, MainFerb robot)
+	public GearShovel(CANTalon armPivot, MotorGroup roller, MainFerb robot, boolean locked)
 	{
 		this.armPivot = armPivot;
 		armPivot.changeControlMode(TalonControlMode.Position);
 		armPivot.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
 		
 		this.roller = roller;
-		
+		this.locked = locked;
 		this.robot = robot;
 		depositGearCommand = new CmdDepositGear(robot);
 		
@@ -89,7 +95,7 @@ public class GearShovel {
 			{
 				if(state == ShovelState.DEPOSITING)
 				{
-					if(RobotMath.abs(getArmAngle() - ShovelState.DEPOSITING.angle) < 10 * Angle.DEGREES || auto_override)
+					if(RobotMath.abs(getArmAngle() - ShovelState.DEPOSITING.angle) < 10 * Angle.DEGREES)
 					{
 						roller.setTarget(-1);
 					}
@@ -109,7 +115,11 @@ public class GearShovel {
 				
 			}
 		});
-		depositingRollerThread.start();
+		
+		if(locked)
+		{
+			depositingRollerThread.start();
+		}
 	}
 	
 	/**
@@ -119,10 +129,9 @@ public class GearShovel {
 	 */
 	private void setState(ShovelState state)
 	{
+		// NOTE: state CAN be set in unlocked mode
 		this.state = state;
-		
-		auto_override = false;
-		
+				
 		armPivot.set(armPivotAppropriatePosition(state.getAngle()));
 		roller.setTarget(state.getPower());
 		
@@ -175,8 +184,11 @@ public class GearShovel {
 		armPivot.setPosition(0);
 	}
 	
+
 	public ShovelState getState()
 	{
+		// state is not tracked in unlocked mode
+		Assert.that(locked);
 		return state;
 	}
 	
@@ -199,7 +211,7 @@ public class GearShovel {
 		protected void initialize() {
 			if (depositing)
 			{
-				setState(ShovelState.DEPOSITING);
+				roller.setTarget(-.5);
 			}
 			else
 			{
@@ -210,16 +222,41 @@ public class GearShovel {
 		@Override
 		protected void end() 
 		{
-			if(depositing && roller.getTarget() == 0)
-			{
-				overrideOffload(true);
-			}
 		}
 		
 		@Override
 		protected boolean isFinished() {
 			return isTimedOut() || (getArmAngle() > state.getAngle() - 3.0 && getArmAngle() < state.getAngle() + 3.0);
 		}
+	}
+	
+	// ----------------------------------------------------------------------------------------------
+	// unlocked mode functions
+	
+	/**
+	 * Controls the angle of the intake manually.
+	 * Can ONLY be used in unlocked mode
+	 * @param anglePercentage a double from -1 to 1, where -1 represents all the way up and 1 represents all the way down.
+	 */
+	public void setPosition(double position)
+	{
+		Assert.that(!locked);
+		
+		double armAngle = ((position + 1)* ShovelState.FLOOR.angle/2.0);
+		
+		armPivot.set(armPivotAppropriatePosition(armAngle));
+	}
+	
+	public void suck()
+	{
+		Assert.that(!locked);
+		roller.setTarget(ShovelState.LOADING.rollerPower);
+	}
+	
+	public void release()
+	{
+		Assert.that(!locked);
+		roller.setTarget(-1); // since releasing is done by the watcher thread, we can't use a constant from ShovelState
 	}
 	
 	/**
@@ -236,9 +273,5 @@ public class GearShovel {
 //			addSequential(robot.drive.new CmdMoveForward(-2 * Length.ft, 4000, 0.3));
 //			addSequential(new CmdSetDepositingMode(false));
 		}
-	}
-	
-	public void overrideOffload(boolean override) {
-		auto_override = override;
 	}
 }

@@ -106,6 +106,9 @@ public class MainFerb extends NarwhalRobot
 	
 	public GenericSendableChooser<Alliance> allianceChooser;
 
+	// true for competition-legal locked mode
+	// false for illegal (but fun) unlocked mode
+	final static boolean INTAKE_LOCKED = false;
 	
 	@Override
 	protected void constructHardware() 
@@ -133,7 +136,7 @@ public class MainFerb extends NarwhalRobot
 
 		// Gear Shovel
 		armPivotMotor = new CANTalon(7);
-		gearShovel = new GearShovel(armPivotMotor, gearRoller, this);
+		gearShovel = new GearShovel(armPivotMotor, gearRoller, this, INTAKE_LOCKED);
         gearShovel.zeroArm();
 		
 		// General Electronics
@@ -154,6 +157,11 @@ public class MainFerb extends NarwhalRobot
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
+        Log.info("MainFerb", INTAKE_LOCKED ? "Gear mechanism is locked and legal." : "Gear mechanism unlocked!  This may void the warranty!");
+        
+        // Climber
+        //climberLeader.changeControlMode(TalonControlMode.PercentVbus);
+        //climberFollower.changeControlMode(TalonControlMode.PercentVbus);
         
         // SmartDashboard
         LAST_BLINK_TIME = System.currentTimeMillis();
@@ -186,12 +194,14 @@ public class MainFerb extends NarwhalRobot
 		// Drive
 		lmRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		lmRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
-		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
+		lmRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");		
+		lmRight.nameControl(new Button(4), "FullSpeed");
+
 		lmRight.addMultiListener(() -> {
 			drive.arcadeDrive(/*.5 * */lmRight.getAxis("MoveTurn"),
 					lmRight.getAxis("MoveForwards"),
 					-1 * lmRight.getAxis("Throttle"),
-					fullSpeed);
+					true);
 			
 			//floorIntakeMotor.set(RobotMath.clamp(lmRight.getAxis("MoveForwards"), 0, 1));
 			//Log.debug("MainFerb", String.format("MoveTurn: %f, MoveForwards: %f, Throttle: %f", lmRight.getAxis("MoveTurn"), lmRight.getAxis("MoveForwards"), lmRight.getAxis("Throttle")));
@@ -204,7 +214,6 @@ public class MainFerb extends NarwhalRobot
 			drive.setGearRatio(gearshift.isInHighGear() ? HIGH_GEAR_RATIO : LOW_GEAR_RATIO);
 		});
 		
-		lmRight.nameControl(new Button(4), "FullSpeed");
 		lmRight.addButtonDownListener("FullSpeed", this::toggleFullSpeed);
 				
 		// Gear Shovel
@@ -213,7 +222,7 @@ public class MainFerb extends NarwhalRobot
 		lmRight.addButtonUpListener("DepositGear", gearShovel::setVerticalMode);
 		
 		lmRight.nameControl(new POV(0), "GearShovelPOV");
-		lmRight.addListener("GearMechanismPOV", (POVValue value) -> {
+		lmRight.addListener("GearShovelPOV", (POVValue value) -> {
 			switch(value.getDirectionValue())
 			{
 			// Sides or Center
@@ -256,15 +265,26 @@ public class MainFerb extends NarwhalRobot
 		});
 		
 		// Climber
+		lmRight.nameControl(new Button(8), "CatchRope");
+		lmRight.addButtonDownListener("CatchRope", () -> 
+		{
+			climberMotor.setTarget(0.2);	
+		});
+		lmRight.addButtonUpListener("CatchRope", ()->
+		{
+			climberMotor.setTarget(0);
+		});
+		
 		lmRight.nameControl(new Button(7), "Climb");
 		lmRight.addButtonDownListener("Climb", () -> 
 		{
-			climberMotor.setTarget(1);	
+			climberMotor.setTarget(1.0);	
 		});
 		lmRight.addButtonUpListener("Climb", ()->
 		{
 			climberMotor.setTarget(0);
 		});
+		
 		
 		// General Robot
 		lmRight.nameControl(new Button(9), "StartCompressor");
@@ -278,34 +298,88 @@ public class MainFerb extends NarwhalRobot
 		
 		addListenerManager(lmRight);
 		
-		lmLeft.nameControl(ControllerExtreme3D.JOYY, "LeftGearShovelControl");
-		lmLeft.addListener("LeftGearShovelControl", (double joyY) ->
+		if(INTAKE_LOCKED)
 		{
-			if (joyY > 0.3)
+			lmLeft.nameControl(ControllerExtreme3D.JOYY, "LeftGearShovelControl");
+			lmLeft.addListener("LeftGearShovelControl", (double joyY) ->
 			{
-				gearShovel.setFloorMode();
-			}
-			else if (joyY < -0.3)
-			{
-				gearShovel.setLoadingMode();
-			}
-			else
-			{
-				gearShovel.setVerticalMode();
-			}
-		});
-		
+				if (joyY < -0.3)
+				{
+					gearShovel.setFloorMode();
+				}
+				else if (joyY > 0.3)
+				{
+					gearShovel.setLoadingMode();
+				}
+				else
+				{
+					gearShovel.setVerticalMode();
+				}
+			});
+			
+
+		}
+		else
+		{
+			lmLeft.nameControl(ControllerExtreme3D.JOYY, "RollerAngleControl");
+			lmLeft.addListener("RollerAngleControl", gearShovel::setPosition);
+			
+			lmLeft.nameControl(ControllerExtreme3D.POV, "RollerPOV");
+			lmLeft.addListener("RollerPOV", (POVValue value) -> {
+				switch(value.getDirectionValue())
+				{
+				// Sides or Center
+				case 3:
+				case 7:
+				case 0:
+					// do nothing
+					break;
+				// Forwards
+				case 1:
+				case 2:
+				case 8:
+					gearShovel.suck();
+					break;
+				// Backwards
+				case 4:
+				case 5:
+				case 6:
+					gearShovel.release();
+					break;
+				}
+			});
+			
+		}
 		lmLeft.nameControl(ControllerExtreme3D.TRIGGER, "LeftGearDeposit");
 		lmLeft.addButtonDownListener("LeftGearDeposit", gearShovel::setDepositingMode);
 		lmLeft.addButtonUpListener("LeftGearDeposit", gearShovel::setVerticalMode);
 		
 		lmLeft.nameControl(new Button(5), "LeftBallCleanup");
 		lmLeft.addButtonDownListener("LeftBallCleanup", gearShovel::setFloorMode);
+		
+		lmLeft.nameControl(new Button(11), "HalfSpeed");
+		lmLeft.addButtonDownListener("HalfSpeed", () ->
+		{
+			drive.tankDrive(.5, .5);
+		});
+		lmLeft.addButtonUpListener("HalfSpeed", () ->
+		{
+			drive.tankDrive(0, 0);
+		});
+		
+		lmLeft.nameControl(new Button(12), "ClearEncoders");
+		lmLeft.addButtonDownListener("ClearEncoders", () ->
+		{
+			drive.clearEncoders();
+		});
+		
+		addListenerManager(lmLeft);
 	}
 
 	@Override
 	protected void teleopInit() {
 		fullSpeed = true;
+		gearShovel.setVerticalMode();
 	}
 	
 	@Override
@@ -350,7 +424,8 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
 		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
-		SmartDashboard.putNumber("Gear Angle", gearShovel.getArmAngle());
+		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSpeed());
+		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSpeed());
 		SmartDashboard.putString("Shovel State", gearShovel.getState().name());
 	}
 
