@@ -4,7 +4,6 @@ import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.units.Length;
 
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -18,10 +17,10 @@ public class MainFerbCompetition extends MainFerb {
 	@Override
 	public void constructHardware() 
 	{
-		climberMotor = new MotorGroup(new VictorSP(0));
+		climberMotor = new MotorGroup(new VictorSP(0), new VictorSP(1));
 		climberMotor.invert();
 
-		wheelDiameter = 4.2 * Length.in;
+		wheelDiameter = 4.08 * Length.in;
 		
 		gearshiftPistons = new Piston(0, 7);
 
@@ -47,10 +46,10 @@ public class MainFerbCompetition extends MainFerb {
 		
 		
 		CameraServer cameraServer = CameraServer.getInstance();
-		
-		UsbCamera camera = cameraServer.startAutomaticCapture(0);
-		camera.setFPS(10);
-		camera.setResolution(480, 320);
+		cameraServer.startAutomaticCapture(0).setFPS(20);
+		//UsbCamera camera = cameraServer.startAutomaticCapture(0).setFPS(20);
+		//camera.setFPS(15);
+		//camera.setResolution(240, 135);
 	}
 	
 	@Override
