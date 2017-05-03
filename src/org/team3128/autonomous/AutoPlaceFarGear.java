@@ -63,9 +63,9 @@ public class AutoPlaceFarGear extends CommandGroup
 		
 		Log.debug("AutoPlaceFarGear", "segment one:" + segment_one + ", segment two: " + segment_two);
 		
-		addSequential(robot.drive.new CmdMoveForward(segment_one + segment_one_inch_offset, 4000, 0.5));
-		addSequential(robot.drive.new CmdArcTurn(64, 2500, side));
-		addSequential(robot.drive.new CmdMoveForward(segment_two + segment_two_inch_offset, 3000, 0.5));
+		addSequential(robot.drive.new CmdMoveForward(segment_one + segment_one_inch_offset, 4000, 0.75));
+		addSequential(robot.drive.new CmdArcTurn(64, 2500, side, .75));
+		addSequential(robot.drive.new CmdMoveForward(segment_two + segment_two_inch_offset, 3000, 0.75));
 		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 	}
 }

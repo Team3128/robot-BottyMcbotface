@@ -18,7 +18,7 @@ public class MainFerbPractice extends MainFerb {
 		climberMotor = new MotorGroup(new VictorSP(0));
 		climberMotor.invert();
 
-		wheelDiameter = 3.85 * Length.in;
+		wheelDiameter = 3.73 * Length.in;
 
 		gearshiftPistons = new Piston(1, 6);
 		gearshiftPistons.invertPiston();

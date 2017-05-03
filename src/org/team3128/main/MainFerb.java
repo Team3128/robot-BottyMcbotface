@@ -108,7 +108,7 @@ public class MainFerb extends NarwhalRobot
 
 	// true for competition-legal locked mode
 	// false for illegal (but fun) unlocked mode
-	final static boolean INTAKE_LOCKED = false;
+	final static boolean INTAKE_LOCKED = true;
 	
 	@Override
 	protected void constructHardware() 
@@ -131,7 +131,7 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 380);
+	drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 400);
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 
 		// Gear Shovel
