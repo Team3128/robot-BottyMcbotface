@@ -131,7 +131,7 @@ public class MainFerb extends NarwhalRobot
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
 		
-	drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 400);
+		drive = new SRXTankDrive(leftDriveFront, rightDriveFront, wheelDiameter * Math.PI, 1, 23.70*Length.in, 28.45*Length.in, 400);
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 
 		// Gear Shovel
@@ -322,7 +322,7 @@ public class MainFerb extends NarwhalRobot
 		else
 		{
 			lmLeft.nameControl(ControllerExtreme3D.JOYY, "RollerAngleControl");
-			lmLeft.addListener("RollerAngleControl", gearShovel::setPosition);
+			lmLeft.addListener("RollerAngleControl", (double value) -> gearShovel.setPosition(-value));
 			
 			lmLeft.nameControl(ControllerExtreme3D.POV, "RollerPOV");
 			lmLeft.addListener("RollerPOV", (POVValue value) -> {
@@ -332,7 +332,7 @@ public class MainFerb extends NarwhalRobot
 				case 3:
 				case 7:
 				case 0:
-					// do nothing
+					gearShovel.stopRoller();
 					break;
 				// Forwards
 				case 1:
@@ -426,7 +426,11 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSpeed());
 		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSpeed());
-		SmartDashboard.putString("Shovel State", gearShovel.getState().name());
+		
+		if(INTAKE_LOCKED)
+		{
+			SmartDashboard.putString("Shovel State", gearShovel.getState().name());
+		}
 	}
 
 	@Override

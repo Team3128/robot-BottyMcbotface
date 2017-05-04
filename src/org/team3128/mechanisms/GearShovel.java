@@ -252,6 +252,13 @@ public class GearShovel {
 		Assert.that(!locked);
 		roller.setTarget(ShovelState.LOADING.rollerPower);
 	}
+
+	public void stopRoller()
+	{
+		Assert.that(!locked);
+		roller.setTarget(ShovelState.DEPOSITING.rollerPower);
+	}
+	
 	
 	public void release()
 	{
