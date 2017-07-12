@@ -18,6 +18,7 @@ import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
+import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
@@ -38,6 +39,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MainFerb extends NarwhalRobot 
 {
+	public PIDConstants gyroPIDConstants = new PIDConstants(0.06, 1.0e-6, 0.02);
+	
 	private final double LOW_GEAR_RATIO = 1;
 	private final double HIGH_GEAR_RATIO = 1;
 	
@@ -79,7 +82,7 @@ public class MainFerb extends NarwhalRobot
 	public DigitalOutput lightSignal;
 	public double wheelDiameter;
 	public boolean scaleLights = false;
-	
+		
 	// SmartDashboard
 	long LAST_BLINK_TIME;
 	boolean currentBlinkState = false;
@@ -150,10 +153,11 @@ public class MainFerb extends NarwhalRobot
 		
 		// Listener Managers
 		rightJoystick = new Joystick(0);
-		lmRight = new ListenerManager(rightJoystick);
-		
 		leftJoystick = new Joystick(1);
-		lmLeft = new ListenerManager(leftJoystick);
+
+		lmRight = new ListenerManager(rightJoystick, leftJoystick);
+		
+		lmLeft = new ListenerManager(new Joystick(3));
 		
 		Log.info("MainFerb", "Activating Ferb");
         Log.info("MainFerb", "Hey! Where's Perry?");
@@ -170,7 +174,8 @@ public class MainFerb extends NarwhalRobot
         allianceChooser.addObject("RED", Alliance.Red);
 		SmartDashboard.putData("Alliance:", allianceChooser);
 
-        
+		gyroPIDConstants.putOnSmartDashboard("Gyro Turn PID");
+
         // Graveyard
      	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
      	//
@@ -226,21 +231,21 @@ public class MainFerb extends NarwhalRobot
 			switch(value.getDirectionValue())
 			{
 			// Sides or Center
-			case 3:
-			case 7:
+			case 2:
+			case 6:
 			case 0:
 				gearShovel.setVerticalMode();
 				break;
 			// Forwards
-			case 1:
-			case 2:
+			case 7:
 			case 8:
+			case 1:
 				gearShovel.setFloorMode();
 				break;
 			// Backwards
+			case 3:
 			case 4:
 			case 5:
-			case 6:
 				gearShovel.setLoadingMode();
 				break;
 			}
@@ -337,7 +342,7 @@ public class MainFerb extends NarwhalRobot
 				// Forwards
 				case 1:
 				case 2:
-				case 8:
+ 				case 8:
 					gearShovel.suck();
 					break;
 				// Backwards
@@ -402,8 +407,8 @@ public class MainFerb extends NarwhalRobot
 		
 		//programChooser.addObject("DEBUG: Deposit Gear", new AutoTestDepositGear(this));
 		//programChooser.addObject("DEBUG: In Place Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_INPLACE));
-		programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
-		//programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
+		//programChooser.addObject("DEBUG: Arc Encoder Turn", new AutoTestTurn(this, TurnType.ENCODERS_ARC));
+		programChooser.addObject("DEBUG: Gyro Turn", new AutoTestTurn(this, TurnType.GYRO));
 
 
 	}
@@ -417,7 +422,8 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Gyro Angle", RobotMath.normalizeAngle(gyro.getAngle()));
 		SmartDashboard.putString("Full Speed?", (currentBlinkState && !fullSpeed) ? "NOT FULL SPEED" : "");
 		SmartDashboard.putString("Current Gear", gearshift.isInHighGear() ? "High Gear" : "Low Gear");
-		SmartDashboard.putNumber("Gear Roller Current", powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT));
+		SmartDashboard.putNumber("Left Drive Current", leftDriveFront.getOutputCurrent());
+		SmartDashboard.putNumber("Right Drive Current", leftDriveFront.getOutputCurrent());
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
 		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
@@ -426,7 +432,7 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
 		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSpeed());
 		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSpeed());
-		
+		//SmartDashboard.putNumber("Phone Angle", phoneCamera.getMostRecentTargets()[0].getHorizontalAngle());    
 		if(INTAKE_LOCKED)
 		{
 			SmartDashboard.putString("Shovel State", gearShovel.getState().name());
@@ -445,6 +451,13 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void teleopPeriodic()
 	{
+		if (Math.abs(rightDriveFront.getSpeed()) > 300.0 && !gearshift.isInHighGear()) {
+			gearshift.shiftToHigh();
+		}
+		else if (Math.abs(rightDriveFront.getSpeed()) < 250.0 && gearshift.isInHighGear()){
+			gearshift.shiftToLow();
+		}
+		
 		//if(powerDistPanel.getCurrent(GEAR_ROLLER_PDP_PORT) > 100)
 		//{
 		//	Log.recoverable("MainFerb", "To much current in the gear roller.");

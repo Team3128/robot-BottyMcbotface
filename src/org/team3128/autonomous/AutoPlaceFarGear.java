@@ -1,5 +1,6 @@
 package org.team3128.autonomous;
 
+import org.team3128.common.autonomous.movement.CmdTurnGyro;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
@@ -64,7 +65,7 @@ public class AutoPlaceFarGear extends CommandGroup
 		Log.debug("AutoPlaceFarGear", "segment one:" + segment_one + ", segment two: " + segment_two);
 		
 		addSequential(robot.drive.new CmdMoveForward(segment_one + segment_one_inch_offset, 4000, 0.75));
-		addSequential(robot.drive.new CmdArcTurn(64, 2500, side, .75));
+		addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 60 * (side == Direction.RIGHT ? 1 : -1), 1, robot.gyroPIDConstants, 2500));
 		addSequential(robot.drive.new CmdMoveForward(segment_two + segment_two_inch_offset, 3000, 0.75));
 		addSequential(robot.gearShovel.new CmdDepositGear(robot));
 	}

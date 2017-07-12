@@ -1,7 +1,6 @@
 package org.team3128.autonomous;
 
 import org.team3128.common.autonomous.movement.CmdTurnGyro;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.main.MainFerb;
 
@@ -43,12 +42,14 @@ public class AutoTestTurn extends CommandGroup
 			addSequential(robot.drive.new CmdArcTurn(90, 4000, Direction.LEFT));
 		}
 		else {
-			PIDConstants gyroPIDConstants = new PIDConstants(.001, 0, 0);
+
 			
-			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, -180, .5, gyroPIDConstants, 5000));
-			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 25, .5, gyroPIDConstants, 5000));
-			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 65, .5, gyroPIDConstants, 5000));
-			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, .5, gyroPIDConstants, 5000));
+			addSequential(robot.drive.new CmdMoveForward(100 * Math.sqrt(3), 2000, 0.75));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, 1, robot.gyroPIDConstants, 5000));
+			addSequential(robot.drive.new CmdMoveForward(100, 2000, 0.75));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, 1, robot.gyroPIDConstants, 5000));
+			addSequential(robot.drive.new CmdMoveForward(100, 2000, 0.75));
+			addSequential(new CmdTurnGyro(robot.gyro, robot.drive, 90, 1, robot.gyroPIDConstants, 5000));
 		}
 	}
 }

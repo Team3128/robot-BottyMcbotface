@@ -4,6 +4,7 @@ import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.units.Length;
 
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -46,10 +47,9 @@ public class MainFerbCompetition extends MainFerb {
 		
 		
 		CameraServer cameraServer = CameraServer.getInstance();
-		cameraServer.startAutomaticCapture(0).setFPS(20);
-		//UsbCamera camera = cameraServer.startAutomaticCapture(0).setFPS(20);
-		//camera.setFPS(15);
-		//camera.setResolution(240, 135);
+		UsbCamera camera = cameraServer.startAutomaticCapture(0);
+		camera.setFPS(15);
+		camera.setResolution(240, 135);
 	}
 	
 	@Override

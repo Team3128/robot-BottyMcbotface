@@ -3,6 +3,7 @@ package org.team3128.main;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.units.Length;
+import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -49,6 +50,8 @@ public class MainFerbPractice extends MainFerb {
 //		camera.setFPS(20);
 		
 		//cameraServer.startAutomaticCapture(0).setFPS(20);
+		
+		NarwhalVisionReceiver phone = new NarwhalVisionReceiver();
 	}
 	
 	@Override
