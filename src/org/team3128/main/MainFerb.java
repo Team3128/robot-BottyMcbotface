@@ -16,7 +16,7 @@ import org.team3128.common.listener.POVValue;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
-import org.team3128.common.util.GenericSendableChooser;
+import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.datatypes.PIDConstants;
@@ -25,19 +25,19 @@ import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.GearShovel;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MainFerb extends NarwhalRobot 
@@ -52,8 +52,8 @@ public class MainFerb extends NarwhalRobot
 	// Drivetrain
 	public SRXTankDrive drive;
 	
-	public CANTalon leftDriveFront, leftDriveBack;
-	public CANTalon rightDriveFront, rightDriveBack;
+	public TalonSRX leftDriveFront, leftDriveBack;
+	public TalonSRX rightDriveFront, rightDriveBack;
 	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPistons;
@@ -61,7 +61,7 @@ public class MainFerb extends NarwhalRobot
 	// Gear mechanism
 	public GearShovel gearShovel;
 	
-	public CANTalon armPivotMotor;
+	public TalonSRX armPivotMotor;
 	public MotorGroup gearRoller;
 	
 	// Climber
@@ -107,13 +107,13 @@ public class MainFerb extends NarwhalRobot
 	//MotorGroup gearMotors;
 		
 	//public Shooter shooter;
-	//public CANTalon shooterMotorRight, shooterMotorLeft;
-	//public CANTalon elevatorMotor;	
+	//public TalonSRX shooterMotorRight, shooterMotorLeft;
+	//public TalonSRX elevatorMotor;	
 	//public VictorSP floorIntakeMotor;	
 	
 	//public PhoneCamera phoneCamera;
 	
-	public GenericSendableChooser<Alliance> allianceChooser;
+	public SendableChooser<Alliance> allianceChooser;
 
 	// true for competition-legal locked mode
 	// false for illegal (but fun) unlocked mode
@@ -123,19 +123,16 @@ public class MainFerb extends NarwhalRobot
 	protected void constructHardware() 
 	{
 		// Drivetrain
-		leftDriveFront = new CANTalon(3);
-		leftDriveBack = new CANTalon(4);
-		rightDriveFront = new CANTalon(1);
-		rightDriveBack = new CANTalon(2);
+		leftDriveFront = new TalonSRX(3);
+		leftDriveBack = new TalonSRX(4);
+		rightDriveFront = new TalonSRX(1);
+		rightDriveBack = new TalonSRX(2);
 				
-		leftDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		rightDriveFront.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		leftDriveFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		rightDriveFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 		
-		leftDriveBack.changeControlMode(TalonControlMode.Follower);
-		leftDriveBack.set(leftDriveFront.getDeviceID());
-		
-		rightDriveBack.changeControlMode(TalonControlMode.Follower);
-		rightDriveBack.set(rightDriveFront.getDeviceID());
+		leftDriveBack.set(ControlMode.Follower, leftDriveFront.getDeviceID());
+		rightDriveBack.set(ControlMode.Follower, rightDriveFront.getDeviceID());
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);
 		gearshift.shiftToLow();
@@ -144,7 +141,7 @@ public class MainFerb extends NarwhalRobot
 		drive.setGearRatio(HIGH_GEAR_RATIO);
 
 		// Gear Shovel
-		armPivotMotor = new CANTalon(7);
+		armPivotMotor = new TalonSRX(7);
 		gearShovel = new GearShovel(armPivotMotor, gearRoller, this, INTAKE_LOCKED);
         gearShovel.zeroArm();
 		
@@ -175,7 +172,7 @@ public class MainFerb extends NarwhalRobot
         
         // SmartDashboard
         LAST_BLINK_TIME = System.currentTimeMillis();
-        allianceChooser = new GenericSendableChooser<Alliance>();
+        allianceChooser = new SendableChooser<Alliance>();
         allianceChooser.addDefault("BLUE", Alliance.Blue);
         allianceChooser.addObject("RED", Alliance.Red);
 		SmartDashboard.putData("Alliance:", allianceChooser);
@@ -184,14 +181,14 @@ public class MainFerb extends NarwhalRobot
 		
 		
 		lightOut = new PWM(6);
-		lights = new NeoPixelArduinoController(new DigitalInput(2), lightOut);
+		//lights = new NeoPixelArduinoController(new DigitalInput(2), lightOut);
 
         // Graveyard
      	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
      	//
-     	//shooterMotorRight = new CANTalon(6);
-     	//shooterMotorLeft = new CANTalon(5);
-     	//elevatorMotor = new CANTalon(7);
+     	//shooterMotorRight = new TalonSRX(6);
+     	//shooterMotorLeft = new TalonSRX(5);
+     	//elevatorMotor = new TalonSRX(7);
      	//elevatorMotor.changeControlMode(TalonControlMode.PercentVbus);
      	//
      	//shooterMotorRight.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -264,12 +261,10 @@ public class MainFerb extends NarwhalRobot
 		lmRight.nameControl(new Button(11), "ZeroShovelPivotArm");
 		lmRight.addButtonDownListener("ZeroShovelPivotArm", () -> 
 		{
-			armPivotMotor.changeControlMode(TalonControlMode.PercentVbus);
-			armPivotMotor.set(-.25);
+			armPivotMotor.set(ControlMode.PercentOutput, -.25);
 		});
 		lmRight.addButtonUpListener("ZeroShovelPivotArm", () -> 
 		{
-			armPivotMotor.changeControlMode(TalonControlMode.Position);
 			gearShovel.zeroArm();
 		});
 		
@@ -413,7 +408,7 @@ public class MainFerb extends NarwhalRobot
 		resetTimer();
 	}
 	
-	protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> programChooser)
+	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser)
 	{		
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Cross Baseline", new AutoCrossBaseline(this));
@@ -445,12 +440,12 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Drive Current", leftDriveFront.getOutputCurrent());
 		SmartDashboard.putNumber("Encoder Heading", drive.getRobotAngle());
 		SmartDashboard.putString("Compressor State", compressor.enabled() ? "On" : "Off");
-		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
-		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getPosition() * Angle.ROTATIONS) / Length.in);
-		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getEncPosition());
-		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getEncPosition());
-		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSpeed());
-		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSpeed());
+		SmartDashboard.putNumber("Left Distance (in)", drive.encDistanceToCm(leftDriveFront.getSelectedSensorPosition(0) * Angle.CTRE_MAGENC_NU) / Length.in);
+		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getSelectedSensorPosition(0) * Angle.CTRE_MAGENC_NU) / Length.in);
+		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSelectedSensorVelocity(0));
 		//SmartDashboard.putNumber("Phone Angle", phoneCamera.getMostRecentTargets()[0].getHorizontalAngle());    
 		if(INTAKE_LOCKED)
 		{
@@ -470,10 +465,12 @@ public class MainFerb extends NarwhalRobot
 	@Override
 	protected void teleopPeriodic()
 	{
-		if (Math.abs(rightDriveFront.getSpeed()) > 300.0 && !gearshift.isInHighGear()) {
+		if (Math.abs(rightDriveFront.getSelectedSensorVelocity(0) * Angle.CTRE_MAGENC_NU) > 300.0 * Angle.ROTATIONS && !gearshift.isInHighGear()) 
+		{
 			gearshift.shiftToHigh();
 		}
-		else if (Math.abs(rightDriveFront.getSpeed()) < 250.0 && gearshift.isInHighGear()){
+		else if (Math.abs(rightDriveFront.getSelectedSensorVelocity(0)) < 250.0 && gearshift.isInHighGear())
+		{
 			gearshift.shiftToLow();
 		}
 		

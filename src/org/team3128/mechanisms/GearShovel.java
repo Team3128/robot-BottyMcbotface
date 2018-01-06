@@ -2,14 +2,15 @@ package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.util.Assert;
+import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.RobotMath;
 import org.team3128.common.util.units.Angle;
 import org.team3128.main.MainFerb;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -55,7 +56,7 @@ public class GearShovel {
 		}
 	}
 	
-	CANTalon armPivot;
+	TalonSRX armPivot;
 	public MotorGroup roller;
 	ShovelState state; // last set state of the shovel.  NOT CORRECT in unlocked mode.
 	CmdDepositGear depositGearCommand;
@@ -73,14 +74,13 @@ public class GearShovel {
 	/**
 	 * Control system for the gear mechanism V.2 - now with floor scooping!
 	 * 
-	 * @param armPivot
+	 * @param armPivotMotor
 	 * @param roller
 	 */
-	public GearShovel(CANTalon armPivot, MotorGroup roller, MainFerb robot, boolean locked)
+	public GearShovel(TalonSRX armPivotMotor, MotorGroup roller, MainFerb robot, boolean locked)
 	{
-		this.armPivot = armPivot;
-		armPivot.changeControlMode(TalonControlMode.Position);
-		armPivot.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		this.armPivot = armPivotMotor;
+		armPivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 		
 		this.roller = roller;
 		this.locked = locked;
@@ -132,7 +132,7 @@ public class GearShovel {
 		// NOTE: state CAN be set in unlocked mode
 		this.state = state;
 				
-		armPivot.set(armPivotAppropriatePosition(state.getAngle()));
+		armPivot.set(ControlMode.Position, armPivotAppropriatePosition(state.getAngle()));
 		roller.setTarget(state.getPower());
 		
 		Log.debug("GearShovel", "Pivot angle: " + state.getAngle() + ", roller power:" + state.getPower());
@@ -171,17 +171,17 @@ public class GearShovel {
 	 */
 	private double armPivotAppropriatePosition(double angle)
 	{
-		return armPivotGearRatio * angle / Angle.ROTATIONS;
+		return armPivotGearRatio * angle / Angle.CTRE_MAGENC_NU;
 	}
 	
 	public double getArmAngle()
 	{
-		return armPivot.getPosition() * Angle.ROTATIONS / 3.0;
+		return armPivot.getSelectedSensorPosition(0) * Angle.CTRE_MAGENC_NU / 3.0;
 	}
 	
 	public void zeroArm()
 	{
-		armPivot.setPosition(0);
+		armPivot.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
 	}
 	
 
@@ -244,7 +244,7 @@ public class GearShovel {
 		
 		double armAngle = ((position + 1)* ShovelState.FLOOR.angle/2.0);
 		
-		armPivot.set(armPivotAppropriatePosition(armAngle));
+		armPivot.set(ControlMode.Position, armPivotAppropriatePosition(armAngle));
 	}
 	
 	public void suck()

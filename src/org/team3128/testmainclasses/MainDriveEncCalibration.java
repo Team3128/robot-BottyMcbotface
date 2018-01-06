@@ -2,11 +2,13 @@ package org.team3128.testmainclasses;
 
 
 import org.team3128.common.NarwhalRobot;
+import org.team3128.common.util.Constants;
 import org.team3128.common.util.datatypes.PIDConstants;
+import org.team3128.common.util.units.Angle;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -15,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class MainDriveEncCalibration extends NarwhalRobot
 {
-	CANTalon driveMotor, driveMotor2;
+	TalonSRX driveMotor, driveMotor2;
 	
 	PIDConstants pidC = new PIDConstants(.25);
 
@@ -25,18 +27,18 @@ public class MainDriveEncCalibration extends NarwhalRobot
 	
 	@Override
 	protected void constructHardware() {
-		driveMotor = new CANTalon(1);
-		driveMotor2 = new CANTalon(2);
+		driveMotor = new TalonSRX(1);
+		driveMotor2 = new TalonSRX(2);
 		
-		driveMotor.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		driveMotor.changeControlMode(TalonControlMode.Position);
-		driveMotor.configPeakOutputVoltage(7, -7);
-		driveMotor.configNominalOutputVoltage(2, -2);
-		driveMotor.setAllowableClosedLoopErr(256); // .25 rotations
-		driveMotor.reverseSensor(false);	
+		driveMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		driveMotor.configPeakOutputForward(7, Constants.CAN_TIMEOUT);
+		driveMotor.configPeakOutputReverse(7, Constants.CAN_TIMEOUT);
+		driveMotor.configNominalOutputForward(2, Constants.CAN_TIMEOUT);
+		driveMotor.configNominalOutputReverse(2, Constants.CAN_TIMEOUT);
+		driveMotor.configAllowableClosedloopError(0, 256, Constants.CAN_TIMEOUT); // .25 rotations
+		driveMotor.setSensorPhase(false);
 		
-		driveMotor2.changeControlMode(TalonControlMode.Follower);
-		driveMotor2.set(3);
+		driveMotor2.set(ControlMode.Follower, driveMotor.getDeviceID());
 		
 		pidC.putOnSmartDashboard("Drive PID");
 	}
@@ -63,7 +65,7 @@ public class MainDriveEncCalibration extends NarwhalRobot
 	
 	@Override
 	protected void updateDashboard() {
-		SmartDashboard.putNumber("Drive encoder pos", driveMotor.getPosition() - lastEnablePosition);		
+		SmartDashboard.putNumber("Drive encoder pos", driveMotor.getSelectedSensorPosition(0) - lastEnablePosition);		
 		
 		//desiredSpeed = SmartDashboard.getNumber("Desired Speed", 10500);
 		
@@ -71,9 +73,9 @@ public class MainDriveEncCalibration extends NarwhalRobot
 		//shooterMotor.setI(SmartDashboard.getNumber("i Value", 0.0));
 		//shooterMotor.setD(SmartDashboard.getNumber("d Value", 0.0));
 		
-		driveMotor.setP(pidC.getkP());
-		driveMotor.setI(pidC.getkI());
-		driveMotor.setD(pidC.getkD());
+		driveMotor.config_kP(0, pidC.getkP(), Constants.CAN_TIMEOUT);
+		driveMotor.config_kI(0, pidC.getkI(), Constants.CAN_TIMEOUT);
+		driveMotor.config_kD(0, pidC.getkD(), Constants.CAN_TIMEOUT);
 		
 		//SmartDashboard.putNumber("Random Number", randomNumber);
 	}
@@ -81,9 +83,9 @@ public class MainDriveEncCalibration extends NarwhalRobot
 
 	@Override
 	protected void teleopInit() {
-		lastEnablePosition = driveMotor.getPosition();
+		lastEnablePosition = driveMotor.getSelectedSensorPosition(0) * Angle.CTRE_MAGENC_NU;
 
-		driveMotor.set(desiredDistance + lastEnablePosition);
+		driveMotor.set(ControlMode.Position, desiredDistance + lastEnablePosition);
 	}
 
 }

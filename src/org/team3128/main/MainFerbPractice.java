@@ -36,12 +36,7 @@ public class MainFerbPractice extends MainFerb {
 		super.constructHardware();
 		compressor.stop();
 
-
-		leftDriveFront.reverseSensor(true);
-		leftDriveFront.reverseOutput(true);
-		rightDriveFront.reverseSensor(false);
-		rightDriveFront.reverseOutput(false);
-		
+		leftDriveFront.setInverted(true);
 		
 		//CameraServer cameraServer = CameraServer.getInstance();
 		
@@ -57,16 +52,7 @@ public class MainFerbPractice extends MainFerb {
 	@Override
 	public void disabledPeriodic(){
 		super.disabledPeriodic();
-		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		rightDriveFront.setAllowableClosedLoopErr(32);
-		
-		armPivotMotor.configNominalOutputVoltage(.75, -.75);
-		
-		armPivotMotor.setNominalClosedLoopVoltage(12);
-
 		drive.setRightSpeedScalar(1);
 	}
 }

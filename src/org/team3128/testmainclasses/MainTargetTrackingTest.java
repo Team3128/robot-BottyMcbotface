@@ -3,13 +3,13 @@ package org.team3128.testmainclasses;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
-import org.team3128.common.util.GenericSendableChooser;
 import org.team3128.common.util.Log;
 import org.team3128.narwhalvision.NarwhalVisionReceiver;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class MainTargetTrackingTest extends NarwhalRobot{
 		Servo trackingServo;
@@ -62,7 +62,7 @@ public class MainTargetTrackingTest extends NarwhalRobot{
 		}
 		
 		@Override
-		protected void constructAutoPrograms(GenericSendableChooser<CommandGroup> autoChooser)
+		protected void constructAutoPrograms(SendableChooser<CommandGroup> autoChooser)
 		{
 			
 		}

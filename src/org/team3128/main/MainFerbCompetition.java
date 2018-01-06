@@ -40,8 +40,7 @@ public class MainFerbCompetition extends MainFerb {
 		
 		super.constructHardware();
 		
-		leftDriveFront.reverseSensor(true);
-		leftDriveFront.reverseOutput(true);
+		leftDriveFront.setInverted(true);
 		
 		drive.setReversedAutonomous(true);
 		
@@ -56,14 +55,12 @@ public class MainFerbCompetition extends MainFerb {
 	protected void disabledPeriodic()
 	{
 		super.disabledPeriodic();
-		leftDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		leftDriveFront.setAllowableClosedLoopErr(32);
 		
-		rightDriveFront.configNominalOutputVoltage(1.5, -1.5);
-		rightDriveFront.setAllowableClosedLoopErr(32);
-		
-		armPivotMotor.configNominalOutputVoltage(.75, -.75);
+		/*
+		armPivotMotor.configNominalOutputForward(.75, Constants.CAN_TIMEOUT);
+		armPivotMotor.configNominalOutputReverse(.75, Constants.CAN_TIMEOUT);
 		armPivotMotor.setNominalClosedLoopVoltage(12);
+		*/
 		
 		drive.setRightSpeedScalar(1.0);
 		drive.setLeftSpeedScalar(1.0);
