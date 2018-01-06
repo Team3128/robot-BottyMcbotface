@@ -7,6 +7,7 @@ import org.team3128.autonomous.AutoTestTurn;
 import org.team3128.autonomous.AutoTestTurn.TurnType;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
+import org.team3128.common.hardware.lights.NeoPixelArduinoController;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.misc.TwoSpeedGearshift;
 import org.team3128.common.hardware.motor.MotorGroup;
@@ -30,9 +31,11 @@ import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -80,8 +83,11 @@ public class MainFerb extends NarwhalRobot
 	public ADXRS450_Gyro gyro;
 	
 	public DigitalOutput lightSignal;
+	public PWM lightOut;
 	public double wheelDiameter;
 	public boolean scaleLights = false;
+	
+	public NeoPixelArduinoController lights;
 		
 	// SmartDashboard
 	long LAST_BLINK_TIME;
@@ -175,6 +181,10 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putData("Alliance:", allianceChooser);
 
 		gyroPIDConstants.putOnSmartDashboard("Gyro Turn PID");
+		
+		
+		lightOut = new PWM(6);
+		lights = new NeoPixelArduinoController(new DigitalInput(2), lightOut);
 
         // Graveyard
      	//gearRollerBackDoor = new GearRollerBackDoor(doorPiston, gearPiston, gearMotors, gearInputSensor);
@@ -376,6 +386,15 @@ public class MainFerb extends NarwhalRobot
 		lmLeft.addButtonDownListener("ClearEncoders", () ->
 		{
 			drive.clearEncoders();
+		});
+		
+		lmLeft.nameControl(new Button(6), "Lights");
+		lmLeft.addButtonDownListener("Lights", () -> {
+			lightOut.setRaw(255);
+		});
+		lmLeft.addButtonUpListener("Lights", () -> {
+			lightOut.setRaw(50);
+			Log.info("MainFerb", "Button 6 up");
 		});
 		
 		addListenerManager(lmLeft);
