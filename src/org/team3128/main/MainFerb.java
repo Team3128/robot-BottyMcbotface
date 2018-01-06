@@ -129,9 +129,11 @@ public class MainFerb extends NarwhalRobot
 		rightDriveBack = new TalonSRX(2);
 				
 		leftDriveFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		
 		rightDriveFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 		
 		leftDriveBack.set(ControlMode.Follower, leftDriveFront.getDeviceID());
+		
 		rightDriveBack.set(ControlMode.Follower, rightDriveFront.getDeviceID());
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPistons);

@@ -20,6 +20,7 @@ public class MainFerbCompetition extends MainFerb {
 	{
 		climberMotor = new MotorGroup(new VictorSP(0), new VictorSP(1));
 		climberMotor.invert();
+		
 
 		wheelDiameter = 4.08 * Length.in;
 		
@@ -40,10 +41,9 @@ public class MainFerbCompetition extends MainFerb {
 		
 		super.constructHardware();
 		
-		leftDriveFront.setInverted(true);
 		
-		drive.setReversedAutonomous(true);
-		
+		drive.setReversedAutonomous(false);
+	
 		
 		CameraServer cameraServer = CameraServer.getInstance();
 		UsbCamera camera = cameraServer.startAutomaticCapture(0);
@@ -51,6 +51,40 @@ public class MainFerbCompetition extends MainFerb {
 		camera.setResolution(240, 135);
 	}
 	
+	
+	
+	@Override
+	protected void teleopInit()
+	{
+		super.teleopInit();
+		
+		// inversions for teleop
+		
+		rightDriveFront.setInverted(false);
+		rightDriveFront.setSensorPhase(false);
+		rightDriveBack.setInverted(false);
+		
+		leftDriveFront.setInverted(true);
+		leftDriveFront.setSensorPhase(false);
+		leftDriveBack.setInverted(false);
+	}
+
+	@Override
+	protected void autonomousInit()
+	{
+		super.autonomousInit();
+		
+		// inversions for autonomous
+		
+		rightDriveFront.setInverted(false);
+		rightDriveFront.setSensorPhase(false);
+		rightDriveBack.setInverted(false);
+		
+		leftDriveFront.setInverted(false);
+		leftDriveFront.setSensorPhase(true);
+		leftDriveBack.setInverted(true);
+	}
+
 	@Override
 	protected void disabledPeriodic()
 	{
