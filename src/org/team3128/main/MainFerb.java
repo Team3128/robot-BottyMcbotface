@@ -446,8 +446,8 @@ public class MainFerb extends NarwhalRobot
 		SmartDashboard.putNumber("Right Distance (in)", drive.encDistanceToCm(rightDriveFront.getSelectedSensorPosition(0) * Angle.CTRE_MAGENC_NU) / Length.in);
 		SmartDashboard.putNumber("Left Encoder Position", leftDriveFront.getSelectedSensorPosition(0));
 		SmartDashboard.putNumber("Right Encoder Position", rightDriveFront.getSelectedSensorPosition(0));
-		SmartDashboard.putNumber("Left Speed", leftDriveFront.getSelectedSensorVelocity(0));
-		SmartDashboard.putNumber("Right Speed", rightDriveFront.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Left Speed (nu)", leftDriveFront.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Right Speed (nu)", rightDriveFront.getSelectedSensorVelocity(0));
 		//SmartDashboard.putNumber("Phone Angle", phoneCamera.getMostRecentTargets()[0].getHorizontalAngle());    
 		if(INTAKE_LOCKED)
 		{

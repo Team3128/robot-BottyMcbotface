@@ -8,6 +8,6 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 public class AutoCrossBaseline extends CommandGroup {
 	public AutoCrossBaseline(MainFerb robot) 
 	{
-		addSequential(robot.drive.new CmdMoveForward(100 * Length.in, 15000, .75));
+		addSequential(robot.drive.new CmdMoveForward(100 * Length.in, 15000, .5));
 	}
 }

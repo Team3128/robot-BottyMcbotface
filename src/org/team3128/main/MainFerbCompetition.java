@@ -22,7 +22,7 @@ public class MainFerbCompetition extends MainFerb {
 		climberMotor.invert();
 		
 
-		wheelDiameter = 4.08 * Length.in;
+		wheelDiameter = 3.68 * Length.in;
 		
 		gearshiftPistons = new Piston(0, 7);
 
